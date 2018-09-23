@@ -15,10 +15,13 @@ public class PlayerController : MonoBehaviour
 
     [Header("Movement")]
     public float speed;
+    public float smoothSpeed;
 
     private Player player;
     private Vector3 forward;
     private Vector3 right;
+    private Vector3 movingTowards;
+    private Vector3 movingVelocity;
 
     private Input inputThisFrame;
 
@@ -45,31 +48,12 @@ public class PlayerController : MonoBehaviour
 
     void HandleMovement()
     {
-        float horizontalMovement = 0f;
-        float verticalMovement = 0f;
-
-        if (inputThisFrame.leftStick.x != 0)
-        {
-            horizontalMovement = inputThisFrame.leftStick.x;
-        }
-
-        if (inputThisFrame.leftStick.y != 0)
-        {
-            verticalMovement = inputThisFrame.leftStick.y;
-        }
-
-        Debug.Log(IsoUtils.TransformVectorToScreenSpace(new Vector3(horizontalMovement, 0f, verticalMovement)) * Time.deltaTime * speed);
-
-        characterController.Move(IsoUtils.TransformVectorToScreenSpace(new Vector3(horizontalMovement, 0f, verticalMovement)) * Time.deltaTime * speed);
-
-        Debug.DrawRay(transform.position, IsoUtils.TransformVectorToScreenSpace(transform.right + transform.forward) * 2, Color.blue);
-        Debug.Log("upper right mag: " + IsoUtils.TransformVectorToScreenSpace(transform.right + transform.forward).magnitude);
-        Debug.DrawRay(transform.position, IsoUtils.TransformVectorToScreenSpace(-transform.right + transform.forward) * 2, Color.cyan);
-        Debug.Log("upper left mag: " + IsoUtils.TransformVectorToScreenSpace(-transform.right + transform.forward).magnitude);
-        Debug.DrawRay(transform.position, IsoUtils.TransformVectorToScreenSpace(-transform.forward + transform.right) * 2, Color.green);
-        Debug.Log("lower left mag: " + IsoUtils.TransformVectorToScreenSpace(-transform.forward + transform.right).magnitude);
-        Debug.DrawRay(transform.position, IsoUtils.TransformVectorToScreenSpace(-transform.forward - transform.right) * 2, Color.red);
-        Debug.Log("lower right mag: " + IsoUtils.TransformVectorToScreenSpace(-transform.forward -transform.right).magnitude);
+        Vector3 stickDirection = new Vector3(inputThisFrame.leftStick.x, 0f, inputThisFrame.leftStick.y).normalized;
+        Debug.Log("stickDirection: " + stickDirection);
+        Vector3 newDirection = Vector3.MoveTowards(movingTowards, stickDirection, smoothSpeed * Time.deltaTime);
+        Debug.Log("newDirection: " + newDirection.ToString("F8"));
+        characterController.Move(IsoUtils.TransformVectorToScreenSpace(newDirection) * Time.deltaTime * speed);
+        movingTowards = newDirection;
     }
 
     void GetInput()

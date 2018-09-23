@@ -297,7 +297,8 @@ MonoBehaviour:
   playerId: 0
   characterController: {fileID: 901440526}
   globalOrientationTransform: {fileID: 34653255}
-  speed: 3
+  speed: 8
+  smoothSpeed: 0.5
 --- !u!143 &901440526
 CharacterController:
   m_ObjectHideFlags: 0

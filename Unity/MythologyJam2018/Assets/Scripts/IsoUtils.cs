@@ -23,8 +23,8 @@ public class IsoUtils : MonoBehaviour
         IsoUtils utils;
         if (TryGetInstance(out utils))
         {
-            Vector3 transformedDirection = utils.transform.TransformVector(input.normalized);
-            return transformedDirection * (1 + Mathf.Abs(Vector3.Dot(transformedDirection.normalized, utils.transform.forward)) * zScreenAdjustment);
+            Vector3 transformedDirection = utils.transform.TransformVector(input);
+            return transformedDirection * (1 + Mathf.Abs(Vector3.Dot(transformedDirection, utils.transform.forward)) * zScreenAdjustment);
         }
 
         return Vector3.zero;
