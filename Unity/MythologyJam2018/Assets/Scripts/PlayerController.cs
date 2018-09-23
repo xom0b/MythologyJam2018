@@ -58,14 +58,18 @@ public class PlayerController : MonoBehaviour
             verticalMovement = inputThisFrame.leftStick.y;
         }
 
-        Debug.Log("speed: " + new Vector2(horizontalMovement, verticalMovement).ToString("F8"));
+        Debug.Log(IsoUtils.TransformVectorToScreenSpace(new Vector3(horizontalMovement, 0f, verticalMovement)) * Time.deltaTime * speed);
 
-        //Vector3 isoMoveDelta = ConvertToIso(new Vector3(horizontalMovement, verticalMovement));
-        characterController.Move(ConvertToIso(new Vector3(horizontalMovement, 0f, verticalMovement)) * Time.deltaTime * speed);
-        Debug.DrawRay(transform.position, ConvertToIso(transform.right), Color.blue);
-        Debug.DrawRay(transform.position, ConvertToIso(-transform.right), Color.cyan);
-        Debug.DrawRay(transform.position, ConvertToIso(transform.forward), Color.green);
-        Debug.DrawRay(transform.position, ConvertToIso(-transform.forward), Color.red);
+        characterController.Move(IsoUtils.TransformVectorToScreenSpace(new Vector3(horizontalMovement, 0f, verticalMovement)) * Time.deltaTime * speed);
+
+        Debug.DrawRay(transform.position, IsoUtils.TransformVectorToScreenSpace(transform.right + transform.forward) * 2, Color.blue);
+        Debug.Log("upper right mag: " + IsoUtils.TransformVectorToScreenSpace(transform.right + transform.forward).magnitude);
+        Debug.DrawRay(transform.position, IsoUtils.TransformVectorToScreenSpace(-transform.right + transform.forward) * 2, Color.cyan);
+        Debug.Log("upper left mag: " + IsoUtils.TransformVectorToScreenSpace(-transform.right + transform.forward).magnitude);
+        Debug.DrawRay(transform.position, IsoUtils.TransformVectorToScreenSpace(-transform.forward + transform.right) * 2, Color.green);
+        Debug.Log("lower left mag: " + IsoUtils.TransformVectorToScreenSpace(-transform.forward + transform.right).magnitude);
+        Debug.DrawRay(transform.position, IsoUtils.TransformVectorToScreenSpace(-transform.forward - transform.right) * 2, Color.red);
+        Debug.Log("lower right mag: " + IsoUtils.TransformVectorToScreenSpace(-transform.forward -transform.right).magnitude);
     }
 
     void GetInput()
@@ -74,10 +78,5 @@ public class PlayerController : MonoBehaviour
         inputThisFrame.aButton = player.GetButton("A Button");
         inputThisFrame.aButtonDown = player.GetButtonDown("A Button");
         inputThisFrame.aButtonUp = player.GetButtonUp("A Button");
-    }
-
-    Vector3 ConvertToIso(Vector3 vector)
-    {
-        return globalOrientationTransform.TransformDirection(vector);
     }
 }
