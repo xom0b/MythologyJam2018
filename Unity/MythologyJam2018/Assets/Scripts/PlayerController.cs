@@ -11,11 +11,6 @@ public class PlayerController : MonoBehaviour
 
     [Header("Inspector References")]
     public CharacterController characterController;
-    public Transform globalOrientationTransform;
-
-    [Header("Movement")]
-    public float speed;
-    public float smoothSpeed;
 
     private Player player;
     private Vector3 forward;
@@ -24,6 +19,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 movingVelocity;
 
     private Input inputThisFrame;
+    private PlayerData playerData;
 
     private struct Input
     {
@@ -35,9 +31,10 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        PlayerData.TryGetInstance(out playerData);
         player = ReInput.players.GetPlayer(playerId);
-        forward = new Vector3(globalOrientationTransform.forward.y, 0f, globalOrientationTransform.forward.z);
-        right = new Vector3(globalOrientationTransform.right.y, 0f, globalOrientationTransform.right.z);
+        forward = new Vector3(playerData.isoOrientation.forward.y, 0f, playerData.isoOrientation.forward.z);
+        right = new Vector3(playerData.isoOrientation.right.y, 0f, playerData.isoOrientation.right.z);
     }
 
     void Update()
@@ -46,13 +43,31 @@ public class PlayerController : MonoBehaviour
         HandleMovement();
     }
 
+    
+
     void HandleMovement()
     {
+        bool isGrounded = false;
+
+        // gravity
+        if (Physics.CheckBox(transform.position, playerData.boxCheckHalfExtents, transform.rotation, playerData.groundLayer, QueryTriggerInteraction.Ignore))
+        {
+            isGrounded = true;
+        }
+
+        // input movement
         Vector3 stickDirection = new Vector3(inputThisFrame.leftStick.x, 0f, inputThisFrame.leftStick.y).normalized;
-        Debug.Log("stickDirection: " + stickDirection);
-        Vector3 newDirection = Vector3.MoveTowards(movingTowards, stickDirection, smoothSpeed * Time.deltaTime);
-        Debug.Log("newDirection: " + newDirection.ToString("F8"));
-        characterController.Move(IsoUtils.TransformVectorToScreenSpace(newDirection) * Time.deltaTime * speed);
+        Vector3 newDirection = Vector3.MoveTowards(movingTowards, stickDirection, playerData.smoothMoveSpeed * Time.deltaTime);
+
+        if (isGrounded)
+        {
+            characterController.Move(IsoUtils.TransformVectorToScreenSpace(newDirection) * playerData.moveSpeed);
+        }
+        else
+        {
+            characterController.Move(IsoUtils.TransformVectorToScreenSpace(newDirection) * playerData.moveSpeed + playerData.gravity);
+        }
+         
         movingTowards = newDirection;
     }
 
