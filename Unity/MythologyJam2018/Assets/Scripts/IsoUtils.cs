@@ -20,13 +20,15 @@ public class IsoUtils : MonoBehaviour
 
     public static Vector3 TransformVectorToScreenSpace(Vector3 input)
     {
+        Vector3 returnVector = Vector3.zero;
+
         IsoUtils utils;
         if (TryGetInstance(out utils))
         {
             Vector3 transformedDirection = utils.transform.TransformVector(input);
-            return transformedDirection * (1 + Mathf.Abs(Vector3.Dot(transformedDirection, utils.transform.forward)) * zScreenAdjustment);
+            returnVector = transformedDirection * (1 + Mathf.Abs(Vector3.Dot(transformedDirection, utils.transform.forward)) * zScreenAdjustment);
         }
 
-        return Vector3.zero;
+        return returnVector;
     }
 }

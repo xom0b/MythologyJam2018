@@ -21,6 +21,8 @@ public class PlayerController : MonoBehaviour
     private Input inputThisFrame;
     private PlayerData playerData;
 
+    private PlayerData.DrunkLevel drunkLevel = PlayerData.DrunkLevel.NotDrunk;
+
     private struct Input
     {
         public Vector2 leftStick;
@@ -57,15 +59,15 @@ public class PlayerController : MonoBehaviour
 
         // input movement
         Vector3 stickDirection = new Vector3(inputThisFrame.leftStick.x, 0f, inputThisFrame.leftStick.y).normalized;
-        Vector3 newDirection = Vector3.MoveTowards(movingTowards, stickDirection, playerData.smoothMoveSpeed * Time.deltaTime);
+        Vector3 newDirection = Vector3.MoveTowards(movingTowards, stickDirection, SmoothMoveSpeed * Time.deltaTime);
 
         if (isGrounded)
         {
-            characterController.Move(IsoUtils.TransformVectorToScreenSpace(newDirection) * playerData.moveSpeed);
+            characterController.Move(IsoUtils.TransformVectorToScreenSpace(newDirection) * MoveSpeed);
         }
         else
         {
-            characterController.Move(IsoUtils.TransformVectorToScreenSpace(newDirection) * playerData.moveSpeed + playerData.gravity);
+            characterController.Move(IsoUtils.TransformVectorToScreenSpace(newDirection) * MoveSpeed + playerData.gravity);
         }
          
         movingTowards = newDirection;
@@ -77,5 +79,53 @@ public class PlayerController : MonoBehaviour
         inputThisFrame.aButton = player.GetButton("A Button");
         inputThisFrame.aButtonDown = player.GetButtonDown("A Button");
         inputThisFrame.aButtonUp = player.GetButtonUp("A Button");
+    }
+
+    private float MoveSpeed
+    {
+        get
+        {
+            if (playerData)
+            {
+                return playerData.drunkenMovementVariabels[(int)drunkLevel].movementSpeed;
+            }
+            else
+            {
+                Debug.LogWarning("Tried getting MoveSpeed with no PlayerData", gameObject);
+                return 0;
+            }
+        }
+    }
+
+    private float SmoothMoveSpeed
+    {
+        get
+        {
+            if (playerData)
+            {
+                return playerData.drunkenMovementVariabels[(int)drunkLevel].smoothMoveSpeed;
+            }
+            else
+            {
+                Debug.LogWarning("Tried getting SmoothMoveSpeed with no PlayerData", gameObject);
+                return 0;
+            }
+        }
+    }
+
+    private float RamSpeed
+    {
+        get
+        {
+            if (playerData)
+            {
+                return playerData.drunkenMovementVariabels[(int)drunkLevel].ramSpeed;
+            }
+            else
+            {
+                Debug.LogWarning("Tried getting RamSpeed with no PlayerData", gameObject);
+                return 0;
+            }
+        }
     }
 }
