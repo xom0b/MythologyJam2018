@@ -528,10 +528,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75ff30347a6c4d341a89d393fc8993d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showDebug: 0
+  showDebug: 1
   isoOrientation: {fileID: 34653255}
   gravity: {x: 0, y: -9.81, z: 0}
-  boxCheckHalfExtents: {x: 0.5, y: 0.5, z: 0.5}
+  boxCheckHalfExtents: {x: 0.375, y: 0.375, z: 0.375}
   groundLayer:
     serializedVersion: 2
     m_Bits: 512

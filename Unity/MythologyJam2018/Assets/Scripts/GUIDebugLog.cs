@@ -8,7 +8,7 @@ public class GUIDebugLog : MonoBehaviour
     public static bool showDebug = false;
     public static string debugLog;
 
-    static void Log(string s)
+    public static void Log(string s)
     {
         debugLog += "/n" + s;
     }

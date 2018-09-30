@@ -58,6 +58,10 @@ public class PlayerController : MonoBehaviour
 
     void HandleMovement()
     {
+        isGrounded = false;
+
+        Debug.DrawLine(startedRamAt, ramDirection * RamDistance, Color.green);
+
         // gravity
         if (Physics.CheckBox(transform.position, playerData.boxCheckHalfExtents, transform.rotation, playerData.groundLayer, QueryTriggerInteraction.Ignore))
         {
@@ -76,14 +80,20 @@ public class PlayerController : MonoBehaviour
                 RamHandler();
                 break;
         }
+        
+        GUIDebugLog.Log(movementState.ToString());
     }
 
     private void IdleHandler()
     {
-        // moved this frame
-        if (HandleStickMovement() != Vector3.zero)
+        if (!isGrounded)
         {
-            movementState = MovementState.Moving;   
+            Move(Vector3.zero);
+        }
+        // moved this frame
+        else if (HandleStickMovement() != Vector3.zero)
+        {
+            movementState = MovementState.Moving;
         }
     }
 
@@ -102,6 +112,7 @@ public class PlayerController : MonoBehaviour
     }
 
     private Vector3 startedRamAt = new Vector3();
+    private Vector3 debugDashDirection = new Vector3();
 
     private bool CheckRam()
     {
@@ -109,7 +120,10 @@ public class PlayerController : MonoBehaviour
 
         if (inputThisFrame.aButtonDown)
         {
-            ramDirection = Vector2ToVector3(inputThisFrame.leftStick);
+
+            ramDirection = Vector2ToVector3(inputThisFrame.leftStick).normalized;
+            Vector3 transformedDirection = IsoUtils.TransformVectorToScreenSpace(new Vector3(ramDirection.x, transform.position.y, ramDirection.z));
+            debugDashDirection = new Vector3(transformedDirection.x, transform.position.y, transformedDirection.z);
             startedRamAt = transform.position;
             pressedRam = true;
         }
@@ -120,18 +134,20 @@ public class PlayerController : MonoBehaviour
     private void RamHandler()
     {
         float currentRamDistance = Vector3.Distance(startedRamAt, transform.position);
+        Vector3 normalizedYPosition = new Vector3(transform.position.x, 0f, transform.position.z);
+        Vector3 normalizedDirection = new Vector3(debugDashDirection.x, transform.position.y, debugDashDirection.z);
 
         if (currentRamDistance >= RamDistance)
         {
             movementState = MovementState.Moving;
         }
         else
-        {
-            Vector3 deltaMovement = Vector3.MoveTowards(transform.position, ramDirection, RamSpeed * Time.deltaTime);
+        {   
+            Vector3 deltaMovement = Vector3.MoveTowards(transform.position, debugDashDirection, RamSpeed * Time.deltaTime);
             Move(deltaMovement);
         }
     }
-    
+
     private Vector3 HandleStickMovement()
     {
         // input movement
@@ -148,11 +164,11 @@ public class PlayerController : MonoBehaviour
     {
         if (isGrounded)
         {
-            characterController.Move(IsoUtils.TransformVectorToScreenSpace(deltaMovement));
+            characterController.Move(deltaMovement);
         }
         else
         {
-            characterController.Move(IsoUtils.TransformVectorToScreenSpace(deltaMovement) + playerData.gravity);
+            characterController.Move(deltaMovement + playerData.gravity);
         }
     }
 
