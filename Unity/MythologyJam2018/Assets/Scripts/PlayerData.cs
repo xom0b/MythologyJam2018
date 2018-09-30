@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerData : MonoBehaviour
 {
+    public bool showDebug;
     public Transform isoOrientation;
     public Vector3 gravity; 
     public Vector3 boxCheckHalfExtents;
@@ -16,6 +17,7 @@ public class PlayerData : MonoBehaviour
         public DrunkLevel drunkLevel;
         public float movementSpeed;
         public float smoothMoveSpeed;
+        public float ramDistance;
         public float ramSpeed;
     }
 
@@ -31,6 +33,7 @@ public class PlayerData : MonoBehaviour
 
     private void Awake()
     {
+        GUIDebugLog.showDebug = showDebug;
         instance = this;
     }
 
