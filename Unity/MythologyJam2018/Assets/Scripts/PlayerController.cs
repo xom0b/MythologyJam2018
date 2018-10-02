@@ -60,7 +60,8 @@ public class PlayerController : MonoBehaviour
     {
         isGrounded = false;
 
-        Debug.DrawLine(startedRamAt, ramDirection * RamDistance, Color.green);
+        Vector3 debugRay = new Vector3(ramDirection.x, ramDirection.y, ramDirection.z);
+        Debug.DrawLine(startedRamAt, startedRamAt + ramDirection * RamDistance, Color.green);
 
         // gravity
         if (Physics.CheckBox(transform.position, playerData.boxCheckHalfExtents, transform.rotation, playerData.groundLayer, QueryTriggerInteraction.Ignore))
@@ -121,9 +122,7 @@ public class PlayerController : MonoBehaviour
         if (inputThisFrame.aButtonDown)
         {
 
-            ramDirection = Vector2ToVector3(inputThisFrame.leftStick).normalized;
-            Vector3 transformedDirection = IsoUtils.TransformVectorToScreenSpace(new Vector3(ramDirection.x, transform.position.y, ramDirection.z));
-            debugDashDirection = new Vector3(transformedDirection.x, transform.position.y, transformedDirection.z);
+            ramDirection = IsoUtils.TransformVectorToScreenSpace(Vector2ToVector3(inputThisFrame.leftStick).normalized);
             startedRamAt = transform.position;
             pressedRam = true;
         }
@@ -134,17 +133,15 @@ public class PlayerController : MonoBehaviour
     private void RamHandler()
     {
         float currentRamDistance = Vector3.Distance(startedRamAt, transform.position);
-        Vector3 normalizedYPosition = new Vector3(transform.position.x, 0f, transform.position.z);
-        Vector3 normalizedDirection = new Vector3(debugDashDirection.x, transform.position.y, debugDashDirection.z);
 
         if (currentRamDistance >= RamDistance)
         {
             movementState = MovementState.Moving;
+            movingTowards = IsoUtils.InverseTransformVectorToScreenSpace(ramDirection);
         }
         else
         {   
-            Vector3 deltaMovement = Vector3.MoveTowards(transform.position, debugDashDirection, RamSpeed * Time.deltaTime);
-            Move(deltaMovement);
+            Move(ramDirection * RamSpeed);
         }
     }
 
