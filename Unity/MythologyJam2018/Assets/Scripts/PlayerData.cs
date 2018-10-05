@@ -1,10 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerData : MonoBehaviour
 {
-    public bool showDebug;
+    public Text debugText;
     public Transform isoOrientation;
     public Vector3 gravity; 
     public Vector3 boxCheckHalfExtents;
@@ -33,7 +34,6 @@ public class PlayerData : MonoBehaviour
 
     private void Awake()
     {
-        GUIDebugLog.showDebug = showDebug;
         instance = this;
     }
 

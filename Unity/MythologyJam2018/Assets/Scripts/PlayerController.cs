@@ -20,7 +20,8 @@ public class PlayerController : MonoBehaviour
     private Input inputThisFrame;
     private PlayerData.DrunkLevel drunkLevel = PlayerData.DrunkLevel.NotDrunk;
     private MovementState movementState = MovementState.Idle;
-    private bool isGrounded = false;
+    private bool groundedLastFrame = false;
+    private bool groundedThisFrame = false;
 
     // movement 
     private Vector3 movingTowards;
@@ -28,12 +29,14 @@ public class PlayerController : MonoBehaviour
 
     // ram variables
     private Vector3 ramDirection;
+    private Vector3 startedRamAt = new Vector3();
 
     private enum MovementState
     {
         Idle,
         Moving,
-        Ramming
+        Ramming,
+        Falling
     }
 
     private struct Input
@@ -54,19 +57,16 @@ public class PlayerController : MonoBehaviour
     {
         GetInput();
         HandleMovement();
+        playerData.debugText.text = movementState.ToString();
     }
 
     void HandleMovement()
     {
-        isGrounded = false;
-
-        Vector3 debugRay = new Vector3(ramDirection.x, ramDirection.y, ramDirection.z);
-        Debug.DrawLine(startedRamAt, startedRamAt + ramDirection * RamDistance, Color.green);
-
-        // gravity
+        // check if grounded
+        groundedThisFrame = false;
         if (Physics.CheckBox(transform.position, playerData.boxCheckHalfExtents, transform.rotation, playerData.groundLayer, QueryTriggerInteraction.Ignore))
         {
-            isGrounded = true;
+            groundedThisFrame = true;
         }
 
         switch (movementState)
@@ -80,21 +80,48 @@ public class PlayerController : MonoBehaviour
             case MovementState.Ramming:
                 RamHandler();
                 break;
+            case MovementState.Falling:
+                FallHandler();
+                break;
         }
-        
-        GUIDebugLog.Log(movementState.ToString());
+
+        // check for falling
+        if (groundedLastFrame && !groundedThisFrame)
+        {
+            OnFall();
+        }
+
+        groundedLastFrame = groundedThisFrame;
     }
+
+    #region State Handlers
 
     private void IdleHandler()
     {
-        if (!isGrounded)
+        if (!groundedThisFrame)
         {
-            Move(Vector3.zero);
+            // Move handles gravity so call move with
+            Move(movingTowards);
         }
         // moved this frame
-        else if (HandleStickMovement() != Vector3.zero)
+        else if (groundedThisFrame && HandleStickMovement() != Vector3.zero)
         {
             movementState = MovementState.Moving;
+        }
+    }
+
+    private void RamHandler()
+    {
+        float currentRamDistance = Vector3.Distance(startedRamAt, transform.position);
+
+        if (currentRamDistance >= RamDistance)
+        {
+            movementState = MovementState.Moving;
+            movingTowards = IsoUtils.InverseTransformVectorToScreenSpace(ramDirection);
+        }
+        else
+        {
+            Move(ramDirection * RamSpeed);
         }
     }
 
@@ -112,37 +139,40 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private Vector3 startedRamAt = new Vector3();
-    private Vector3 debugDashDirection = new Vector3();
+    private void FallHandler()
+    {
+        if (groundedThisFrame)
+        {
+            movementState = MovementState.Idle;
+        }
+        else
+        {
+            Move(movingTowards * MoveSpeed);
+        }
+    }
+
+    #endregion
+
+    float fallingMoveSpeed;
+    private void OnFall()
+    {
+        movementState = MovementState.Falling;
+        movingTowards = new Vector3(characterController.rigidbody.velocity.x, 0f, characterController.rigidbody.velocity.z).normalized;
+        fallingMoveSpeed = characterController.rigidbody.velocity.magnitude;
+    }
 
     private bool CheckRam()
     {
         bool pressedRam = false;
 
-        if (inputThisFrame.aButtonDown)
+        if (inputThisFrame.aButtonDown && groundedThisFrame)
         {
-
             ramDirection = IsoUtils.TransformVectorToScreenSpace(Vector2ToVector3(inputThisFrame.leftStick).normalized);
             startedRamAt = transform.position;
             pressedRam = true;
         }
 
         return pressedRam;
-    }
-
-    private void RamHandler()
-    {
-        float currentRamDistance = Vector3.Distance(startedRamAt, transform.position);
-
-        if (currentRamDistance >= RamDistance)
-        {
-            movementState = MovementState.Moving;
-            movingTowards = IsoUtils.InverseTransformVectorToScreenSpace(ramDirection);
-        }
-        else
-        {   
-            Move(ramDirection * RamSpeed);
-        }
     }
 
     private Vector3 HandleStickMovement()
@@ -159,7 +189,7 @@ public class PlayerController : MonoBehaviour
 
     private void Move(Vector3 deltaMovement)
     {
-        if (isGrounded)
+        if (groundedThisFrame || movementState == MovementState.Ramming)
         {
             characterController.Move(deltaMovement);
         }
