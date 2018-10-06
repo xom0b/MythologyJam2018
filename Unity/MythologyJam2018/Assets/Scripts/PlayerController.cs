@@ -85,6 +85,8 @@ public class PlayerController : MonoBehaviour
                 break;
         }
 
+        Debug.DrawLine(startedRamAt, ramDirection * RamDistance, Color.red);
+
         // check for falling
         if (groundedLastFrame && !groundedThisFrame)
         {
@@ -117,7 +119,7 @@ public class PlayerController : MonoBehaviour
         if (currentRamDistance >= RamDistance)
         {
             movementState = MovementState.Moving;
-            movingTowards = IsoUtils.InverseTransformVectorToScreenSpace(ramDirection);
+            movingTowards = IsoUtils.InverseTransformVectorToScreenSpace(ramDirection.normalized);
         }
         else
         {
@@ -147,18 +149,17 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            Move(movingTowards * MoveSpeed);
+            //movingTowards = Vector3.MoveTowards(movingTowards, Vector3.zero, movingTowards.magnitude * Time.deltaTime);
+            Move(new Vector3(characterController.rigidbody.velocity.x, transform.position.y, characterController.rigidbody.velocity.z));
         }
     }
 
     #endregion
 
-    float fallingMoveSpeed;
     private void OnFall()
     {
         movementState = MovementState.Falling;
-        movingTowards = new Vector3(characterController.rigidbody.velocity.x, 0f, characterController.rigidbody.velocity.z).normalized;
-        fallingMoveSpeed = characterController.rigidbody.velocity.magnitude;
+        movingTowards = new Vector3(characterController.rigidbody.velocity.x, 0f, characterController.rigidbody.velocity.z);
     }
 
     private bool CheckRam()
@@ -179,7 +180,7 @@ public class PlayerController : MonoBehaviour
     {
         // input movement
         Vector3 stickDirection = Vector2ToVector3(inputThisFrame.leftStick).normalized;
-        Vector3 stickMovement = Vector3.MoveTowards(movingTowards, stickDirection, SmoothMoveSpeed * Time.deltaTime);
+        Vector3 stickMovement = Vector3.MoveTowards(movingTowards, stickDirection, MoveSpeed * Time.deltaTime);
 
         Move(IsoUtils.TransformVectorToScreenSpace(stickMovement) * MoveSpeed);
 
@@ -189,7 +190,7 @@ public class PlayerController : MonoBehaviour
 
     private void Move(Vector3 deltaMovement)
     {
-        if (groundedThisFrame || movementState == MovementState.Ramming)
+        if (groundedThisFrame)
         {
             characterController.Move(deltaMovement);
         }
@@ -207,7 +208,7 @@ public class PlayerController : MonoBehaviour
         inputThisFrame.aButtonUp = player.GetButtonUp("A Button");
     }
 
-    private Vector3 Vector2ToVector3(Vector2 vector)
+    private Vector3 Vector2ToVector3(Vector2 vector, float y = 0f)
     {
         return new Vector3(vector.x, 0f, vector.y);
     }

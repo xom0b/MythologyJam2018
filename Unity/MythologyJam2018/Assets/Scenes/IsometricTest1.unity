@@ -255,9 +255,28 @@ Prefab:
       propertyPath: m_RootOrder
       value: 2
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 65723621447373428, guid: 1a4c81600c34a9d4c936455d769609fd, type: 2}
   m_SourcePrefab: {fileID: 100100000, guid: 1a4c81600c34a9d4c936455d769609fd, type: 2}
   m_IsPrefabAsset: 0
+--- !u!1 &256928921 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1064768131940988, guid: 1a4c81600c34a9d4c936455d769609fd,
+    type: 2}
+  m_PrefabInternal: {fileID: 256928920}
+--- !u!136 &256928922
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 256928921}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.375
+  m_Height: 0.75
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &611549500
 Prefab:
   m_ObjectHideFlags: 0
@@ -761,7 +780,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   debugText: {fileID: 677286874}
   isoOrientation: {fileID: 34653255}
-  gravity: {x: 0, y: -7.3575, z: 0}
+  gravity: {x: 0, y: -9.81, z: 0}
   boxCheckHalfExtents: {x: 0.375, y: 0.375, z: 0.375}
   groundLayer:
     serializedVersion: 2
