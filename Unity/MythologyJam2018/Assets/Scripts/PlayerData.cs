@@ -10,6 +10,7 @@ public class PlayerData : MonoBehaviour
     public Vector3 gravity; 
     public Vector3 boxCheckHalfExtents;
     public LayerMask groundLayer;
+    public LayerMask playerLayer;
     public List<DrunkenMovementVariables> drunkenMovementVariabels = new List<DrunkenMovementVariables>();
 
     [System.Serializable]

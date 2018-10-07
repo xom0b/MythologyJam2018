@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Inspector References")]
     public CharacterController characterController;
+    public CapsuleCollider capsuleCollider;
 
     // rewired
     private Player player;
@@ -31,7 +32,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 ramDirection;
     private Vector3 startedRamAt = new Vector3();
 
-    private enum MovementState
+    public enum MovementState
     {
         Idle,
         Moving,
@@ -55,9 +56,66 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        CheckPlayerCollision();
         GetInput();
         HandleMovement();
         playerData.debugText.text = movementState.ToString();
+
+        if (gameObject.name == "Player")
+        {
+            Debug.DrawRay(collisionPoint, collisionDirection, Color.red);
+        }
+        else
+        {
+            Debug.DrawRay(collisionPoint, collisionDirection, Color.green);
+        }
+    }
+
+    public MovementState GetMovementState()
+    {
+        return movementState;
+    }
+
+    public PlayerData.DrunkLevel DrunkLevel()
+    {
+        return drunkLevel;
+    }
+
+    private Vector3 collisionDirection = Vector3.zero;
+    private Vector3 collisionPoint = Vector3.zero;
+
+    private bool collidedLastFrame = false;
+    private bool collidedThisFrame = false;
+
+    private void CheckPlayerCollision()
+    {
+        collidedThisFrame = false;
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, capsuleCollider.radius, playerData.playerLayer);
+        if (hitColliders.Length > 0)
+        {
+            foreach(Collider collider in hitColliders)
+            {
+                if (collider.gameObject != gameObject)
+                {
+                    collidedThisFrame = true;
+                    if (collidedThisFrame && !collidedLastFrame)
+                    {
+                        OnCollision(collider);
+                    }
+                }
+            }
+        }
+
+        collidedLastFrame = collidedThisFrame;
+    }
+
+    private void OnCollision(Collider collider)
+    {
+        PlayerManager playerManager;
+        if (PlayerManager.TryGetInstance(out playerManager))
+        {
+            playerManager.RegisterCollfisionThisFrame(gameObject, collider.gameObject);
+        }
     }
 
     void HandleMovement()
@@ -84,8 +142,6 @@ public class PlayerController : MonoBehaviour
                 FallHandler();
                 break;
         }
-
-        Debug.DrawLine(startedRamAt, ramDirection * RamDistance, Color.red);
 
         // check for falling
         if (groundedLastFrame && !groundedThisFrame)
