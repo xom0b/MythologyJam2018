@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
-    public Rigidbody rigidbody;
+    public Rigidbody attachedRigidbody;
 
     private Vector3 deltaMovement;
 
@@ -12,7 +12,8 @@ public class CharacterController : MonoBehaviour
     {
         if (deltaMovement != Vector3.zero)
         {
-            rigidbody.MovePosition(transform.position + deltaMovement * Time.fixedDeltaTime);
+            Debug.Log("moving! " + deltaMovement);
+            attachedRigidbody.MovePosition(transform.position + deltaMovement * Time.fixedDeltaTime);
             deltaMovement = Vector3.zero;
         }
     }

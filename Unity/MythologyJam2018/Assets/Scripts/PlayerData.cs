@@ -11,7 +11,11 @@ public class PlayerData : MonoBehaviour
     public Vector3 boxCheckHalfExtents;
     public LayerMask groundLayer;
     public LayerMask playerLayer;
+    public float collisionTimeout;
+    public float idleFriction;
     public List<DrunkenMovementVariables> drunkenMovementVariabels = new List<DrunkenMovementVariables>();
+    public GameObject floor;
+    public GameObject killFloor;
 
     [System.Serializable]
     public struct DrunkenMovementVariables
