@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Rewired;
-using System;
 
 public class PlayerController : MonoBehaviour
 {
@@ -40,7 +39,6 @@ public class PlayerController : MonoBehaviour
         Moving,
         Ramming,
         HitByRam,
-        Falling
     }
 
     private struct Input
@@ -59,17 +57,11 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        //CheckPlayerCollision();
         GetInput();
         HandleMovement();
         playerData.debugText.text = movementState.ToString();
 
         Debug.DrawLine(hitByRamAt, currentHitDirection * hitByRamDistance);
-
-        if (gameObject.name == "Player")
-        {
-            Debug.Log(capsuleCollider.attachedRigidbody.velocity.magnitude.ToString("F8"));
-        }
     }
 
     public MovementState GetMovementState()
@@ -88,8 +80,6 @@ public class PlayerController : MonoBehaviour
     private bool collidedLastFrame = false;
     private bool collidedThisFrame = false;
 
-    
-
     private void CheckPlayerCollision()
     {
         collidedThisFrame = false;
@@ -97,7 +87,7 @@ public class PlayerController : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, capsuleCollider.radius, playerData.playerLayer);
         if (hitColliders.Length > 0)
         {
-            foreach(Collider collider in hitColliders)
+            foreach (Collider collider in hitColliders)
             {
                 if (collider.gameObject != gameObject)
                 {
@@ -123,10 +113,11 @@ public class PlayerController : MonoBehaviour
     }
 
     void HandleMovement()
-    {
+    { 
         // check if grounded
         groundedThisFrame = false;
-        if (Physics.CheckBox(transform.position, playerData.boxCheckHalfExtents, transform.rotation, playerData.groundLayer, QueryTriggerInteraction.Ignore))
+        Debug.DrawLine(transform.position, transform.position - transform.up * (capsuleCollider.radius + 0.1f), Color.green);
+        if (Physics.Raycast(transform.position, -transform.up, capsuleCollider.radius + 0.1f, playerData.groundLayer))
         {
             groundedThisFrame = true;
         }
@@ -142,21 +133,10 @@ public class PlayerController : MonoBehaviour
             case MovementState.Ramming:
                 RamHandler();
                 break;
-            case MovementState.Falling:
-                FallHandler();
-                break;
             case MovementState.HitByRam:
                 HitByRamHandler();
                 break;
         }
-
-        // check for falling
-        if (groundedLastFrame && !groundedThisFrame)
-        {
-            OnFall();
-        }
-
-
 
         groundedLastFrame = groundedThisFrame;
     }
@@ -165,13 +145,7 @@ public class PlayerController : MonoBehaviour
 
     private void IdleHandler()
     {
-        if (!groundedThisFrame)
-        {
-            // Move handles gravity so call move with
-            Move(movingTowards);
-        }
-        // moved this frame
-        else if (groundedThisFrame && HandleStickMovement() != Vector3.zero)
+        if (HandleStickMovement() != Vector3.zero)
         {
             movementState = MovementState.Moving;
         }
@@ -195,7 +169,7 @@ public class PlayerController : MonoBehaviour
     private void MovingHandler()
     {
         // check for ram
-        if (CheckRam())
+        if (CheckRam() && groundedThisFrame)
         {
             movementState = MovementState.Ramming;
         }
@@ -263,12 +237,6 @@ public class PlayerController : MonoBehaviour
 
     #endregion
 
-    private void OnFall()
-    {
-        movementState = MovementState.Falling;
-        movingTowards = new Vector3(characterController.attachedRigidbody.velocity.x, 0f, characterController.attachedRigidbody.velocity.z);
-    }
-
     private bool CheckRam()
     {
         bool pressedRam = false;
@@ -286,9 +254,14 @@ public class PlayerController : MonoBehaviour
     private Vector3 HandleStickMovement()
     {
         // input movement
-        Vector3 stickDirection = Vector2ToVector3(inputThisFrame.leftStick).normalized;
-        Vector3 stickMovement = Vector3.MoveTowards(movingTowards, stickDirection, MoveSpeed * Time.deltaTime);
+        Vector3 stickDirection = Vector3.zero;
 
+        if (groundedThisFrame)
+        {
+            stickDirection = Vector2ToVector3(inputThisFrame.leftStick).normalized;
+        }
+
+        Vector3 stickMovement = Vector3.MoveTowards(movingTowards, stickDirection, MoveSpeed * Time.deltaTime);
         Move(IsoUtils.TransformVectorToScreenSpace(stickMovement) * MoveSpeed);
 
         movingTowards = stickMovement;
@@ -297,14 +270,12 @@ public class PlayerController : MonoBehaviour
 
     private void Move(Vector3 deltaMovement)
     {
-        if (groundedThisFrame)
-        {
-            characterController.Move(deltaMovement);
-        }
-        else
-        {
-            characterController.Move(deltaMovement + playerData.gravity);
-        }
+        characterController.Move(deltaMovement);
+    }
+
+    private void AddForce(Vector3 force)
+    {
+
     }
 
     private void GetInput()
@@ -320,6 +291,19 @@ public class PlayerController : MonoBehaviour
         return new Vector3(vector.x, 0f, vector.y);
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject != gameObject)
+        {
+            PlayerManager playerManager;
+            if (PlayerManager.TryGetInstance(out playerManager))
+            {
+                playerManager.RegisterCollisionThisFrame(gameObject, collision.gameObject);
+            }
+        }
+    }
+
+    #region Properties
     private float MoveSpeed
     {
         get
@@ -383,4 +367,5 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+    #endregion
 }

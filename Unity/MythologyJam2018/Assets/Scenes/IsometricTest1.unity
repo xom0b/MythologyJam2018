@@ -255,26 +255,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 2
       objectReference: {fileID: 0}
-    - target: {fileID: 23896126199073898, guid: 1a4c81600c34a9d4c936455d769609fd,
-        type: 2}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: c34fbd299f626c347add6bd9311ea5c7, type: 2}
-    - target: {fileID: 114095715156202286, guid: 1a4c81600c34a9d4c936455d769609fd,
-        type: 2}
-      propertyPath: playerId
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 136679422785367012, guid: 1a4c81600c34a9d4c936455d769609fd,
-        type: 2}
-      propertyPath: m_IsTrigger
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114274628635348810, guid: 1a4c81600c34a9d4c936455d769609fd,
-        type: 2}
-      propertyPath: attachedRigidbody
-      value: 
-      objectReference: {fileID: 1790896916}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1a4c81600c34a9d4c936455d769609fd, type: 2}
   m_IsPrefabAsset: 0
@@ -930,6 +910,8 @@ MonoBehaviour:
     smoothMoveSpeed: 0
     ramDistance: 0
     ramSpeed: 0
+  floor: {fileID: 0}
+  killFloor: {fileID: 0}
 --- !u!4 &1688589217
 Transform:
   m_ObjectHideFlags: 0
@@ -1041,11 +1023,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d13dc8f0a4de7924bb770175d01cdaa4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!54 &1790896916 stripped
-Rigidbody:
-  m_CorrespondingSourceObject: {fileID: 54056300853525272, guid: 1a4c81600c34a9d4c936455d769609fd,
-    type: 2}
-  m_PrefabInternal: {fileID: 256928920}
 --- !u!1 &2015108087
 GameObject:
   m_ObjectHideFlags: 0

@@ -55,8 +55,6 @@ public class PlayerManager : MonoBehaviour
 
     private void ProcessCollision(CollisionInfo collision)
     {
-        Debug.Log("processing collision");
-
         PlayerController registeredPlayerController = collision.registeredCollision.GetComponent<PlayerController>();
         PlayerController collidedPlayerController = collision.collidedWith.GetComponent<PlayerController>();
         Rigidbody registeredRigidbody = null;

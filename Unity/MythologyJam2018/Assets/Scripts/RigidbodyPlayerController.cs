@@ -62,11 +62,6 @@ public class RigidbodyPlayerController : MonoBehaviour
         playerData.debugText.text = movementState.ToString();
 
         Debug.DrawLine(hitByRamAt, currentHitDirection * hitByRamDistance);
-
-        if (gameObject.name == "Player")
-        {
-            Debug.Log(capsuleCollider.attachedRigidbody.velocity.magnitude.ToString("F8"));
-        }
     }
 
     public MovementState GetMovementState()
@@ -126,8 +121,6 @@ public class RigidbodyPlayerController : MonoBehaviour
         {
             groundedThisFrame = true;
         }
-
-        Debug.Log("grounded: " + groundedThisFrame);
 
         switch (movementState)
         {
@@ -291,6 +284,19 @@ public class RigidbodyPlayerController : MonoBehaviour
         return new Vector3(vector.x, 0f, vector.y);
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject != gameObject)
+        {
+            PlayerManager playerManager;
+            if(PlayerManager.TryGetInstance(out playerManager))
+            {
+                playerManager.RegisterCollisionThisFrame(gameObject, collision.gameObject);
+            }
+        }
+    }
+
+    #region Properties
     private float MoveSpeed
     {
         get
@@ -354,4 +360,5 @@ public class RigidbodyPlayerController : MonoBehaviour
             }
         }
     }
+    #endregion
 }
