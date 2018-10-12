@@ -273,11 +273,6 @@ public class PlayerController : MonoBehaviour
         characterController.Move(deltaMovement);
     }
 
-    private void AddForce(Vector3 force)
-    {
-
-    }
-
     private void GetInput()
     {
         inputThisFrame.leftStick = new Vector2(player.GetAxis("Left Stick Horizontal"), player.GetAxis("Left Stick Vertical"));
