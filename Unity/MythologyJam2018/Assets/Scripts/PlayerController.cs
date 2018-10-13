@@ -65,8 +65,6 @@ public class PlayerController : MonoBehaviour
         GetInput();
         HandleMovement();
         playerData.debugText.text = movementState.ToString();
-        Debug.Log(gameObject.name + " velocity: " + velocity.ToString("F8"));
-
         velocity = (transform.position - positionLastFrame) / Time.deltaTime;
         positionLastFrame = transform.position;
     }
@@ -207,7 +205,7 @@ public class PlayerController : MonoBehaviour
         if (currentDistance >= hitByRamDistance)
         {
             movementState = MovementState.Moving;
-            movingTowards = IsoUtils.InverseTransformVectorToScreenSpace(currentHitDirection * hitSpeed);
+            movingTowards = IsoUtils.InverseTransformVectorToScreenSpace(currentHitDirection.normalized);
             collisionTimer = 0f;
         }
         else
@@ -223,7 +221,7 @@ public class PlayerController : MonoBehaviour
 
     private float collisionTimer;
 
-    public void RegisterCollision(Vector3 newDirection, float newSpeed)
+    public void RegisterCollision(Vector3 newDirection, float newSpeed, float distance)
     {
         if (collisionTimer < playerData.collisionTimeout)
         {
@@ -232,8 +230,17 @@ public class PlayerController : MonoBehaviour
             collisionTimer = 0f;
             currentHitDirection = newDirection;
             hitSpeed = newSpeed;
-            Vector3 endPoint = transform.position + currentHitDirection * hitSpeed;
+            Vector3 endPoint = transform.position + currentHitDirection.normalized * distance;
             hitByRamDistance = Vector3.Distance(transform.position, endPoint);
+            Debug.Log("hit by ram distance: " + hitByRamDistance);
+        }
+    }
+
+    public void UpdateCollisionDirection(Vector3 newDirection)
+    {
+        if (movementState == MovementState.HitByRam)
+        {
+            currentHitDirection = newDirection;
         }
     }
 
@@ -361,6 +368,22 @@ public class PlayerController : MonoBehaviour
             if (playerData)
             {
                 return playerData.drunkenMovementVariabels[(int)drunkLevel].ramDistance;
+            }
+            else
+            {
+                Debug.LogWarning("Tried getting RamDistance with no PlayerData", gameObject);
+                return 0;
+            }
+        }
+    }
+
+    public float HitByRamDistance
+    {
+        get
+        {
+            if (playerData)
+            {
+                return playerData.drunkenMovementVariabels[(int)drunkLevel].hitByRamDistance;
             }
             else
             {

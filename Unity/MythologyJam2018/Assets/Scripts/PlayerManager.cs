@@ -67,9 +67,6 @@ public class PlayerManager : MonoBehaviour
 
     private void ProcessCollision(CollisionInfo collision)
     {
-        debugSphere1.transform.position = collision.registeredCollision.transform.position;
-        debugSphere2.transform.position = collision.collidedWith.transform.position;
-        // TODO: LOOK AT https://ericleong.me/research/circle-circle/#dynamic-circle-circle-collision
         PlayerController registeredPlayerController = collision.registeredCollision.GetComponent<PlayerController>();
         PlayerController collidedPlayerController = collision.collidedWith.GetComponent<PlayerController>();
         Rigidbody registeredRigidbody = null;
@@ -83,66 +80,56 @@ public class PlayerManager : MonoBehaviour
 
         if (registeredRigidbody != null && collidedRigidbody != null && registeredPlayerController != null && collidedRigidbody != null)
         {
-            // check out: https://gamedevelopment.tutsplus.com/tutorials/when-worlds-collide-simulating-circle-circle-collisions--gamedev-769
+            // circle math: https://ericleong.me/research/circle-circle/#dynamic-circle-circle-collision
             Vector3 registeredVelocity = new Vector3(registeredPlayerController.velocity.x, 0f, registeredPlayerController.velocity.z);
             Vector3 collidedVelocity = new Vector3(collidedPlayerController.velocity.x, 0f, collidedPlayerController.velocity.z);
 
             float distance = Vector3.Distance(registeredPlayerController.transform.position, collidedPlayerController.transform.position);
 
-            /*
-            double nx = (cx2 - cx1) / d; 
-            double ny = (cy2 - cy1) / d; 
-            */
-
             float newX = (collidedPlayerController.transform.position.x - registeredPlayerController.transform.position.x) / distance;
             float newZ = (registeredPlayerController.transform.position.z - collidedPlayerController.transform.position.z) / distance;
-
-            // (circle1.vx * nx + circle1.vy * n_y - circle2.vx * nx - circle2.vy * n_y)
+            
             float p = registeredVelocity.x * newX + registeredVelocity.z * newZ - collidedVelocity.x * newX - collidedVelocity.z * newZ;
 
-            /*
-            vx1 = circle1.vx - p * circle1.mass * n_x; 
-            vy1 = circle1.vy - p * circle1.mass * n_y; 
-            vx2 = circle2.vx + p * circle2.mass * n_x; 
-            vy2 = circle2.vy + p * circle2.mass * n_y;
-            */
+            Vector3 newRegisteredDirection = new Vector3(collidedVelocity.x + p * newX, 0f, collidedVelocity.z + p * newZ).normalized;
+            Vector3 newCollidedDirection = new Vector3(registeredVelocity.x - p * newX, 0f, registeredVelocity.z - p * newZ).normalized;
 
-            Vector3 newRegisteredDirection = new Vector3(collidedVelocity.x + p * newX, 0f, collidedVelocity.z + p * newZ);
-            Vector3 newCollidedDirection = new Vector3(registeredVelocity.x - p * newX, 0f, registeredVelocity.z - p * newZ);
+            float newRegisteredDistance = registeredPlayerController.HitByRamDistance;
+            float newCollidedDistance = registeredPlayerController.HitByRamDistance;
 
-            debugRay1 = newRegisteredDirection;
-            debugRay2 = newCollidedDirection;
-
-            float newRegisteredSpeed = newRegisteredDirection.magnitude;
-            float newCollidedSpeed = newRegisteredDirection.magnitude;
-
-            newRegisteredDirection = newRegisteredDirection.normalized;
-            newCollidedDirection = newCollidedDirection.normalized;
+            float newRegisteredSpeed = 0f;
+            float newCollidedSpeed = 0f;
 
             if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming && collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
             {
                 newRegisteredSpeed = collidedPlayerController.RamSpeed / registeredPlayerController.RamSpeed;
                 newCollidedSpeed = registeredPlayerController.RamSpeed / collidedPlayerController.RamSpeed;
 
-                registeredPlayerController.RegisterCollision(newRegisteredDirection, newRegisteredSpeed);
-                collidedPlayerController.RegisterCollision(newCollidedDirection, newCollidedSpeed);
+                newRegisteredDistance = collidedPlayerController.HitByRamDistance / registeredPlayerController.HitByRamDistance;
+                newCollidedDistance = registeredPlayerController.HitByRamDistance / collidedPlayerController.HitByRamDistance;
+
+                registeredPlayerController.RegisterCollision(newRegisteredDirection, newRegisteredSpeed, newRegisteredDistance);
+                collidedPlayerController.RegisterCollision(newCollidedDirection, newCollidedSpeed, newCollidedDistance);
             }
             else
             {
-                if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
+                if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming && collidedPlayerController.GetMovementState() == PlayerController.MovementState.HitByRam)
+                {
+                    collidedPlayerController.UpdateCollisionDirection(newCollidedDirection.normalized);
+                }
+                else if (collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming && registeredPlayerController.GetMovementState() == PlayerController.MovementState.HitByRam)
+                {
+                    registeredPlayerController.UpdateCollisionDirection(newRegisteredDirection.normalized);
+                }
+                else if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
                 {
                     newCollidedSpeed = registeredPlayerController.RamSpeed;
-                    collidedPlayerController.RegisterCollision(newCollidedDirection, newCollidedSpeed);
+                    collidedPlayerController.RegisterCollision(newCollidedDirection.normalized, newCollidedSpeed, newCollidedDistance);
                 }
                 else if (collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
                 {
                     newRegisteredSpeed = collidedPlayerController.RamSpeed;
-                    registeredPlayerController.RegisterCollision(IsoUtils.InverseTransformVectorToScreenSpace(newRegisteredDirection), newRegisteredSpeed);
-                }
-                else
-                {
-                    //registeredPlayerController.SetMovingTowards(IsoUtils.InverseTransformVectorToScreenSpace(newRegisteredDirection.normalized) * collidedVelocity.magnitude);
-                    //collidedPlayerController.SetMovingTowards(IsoUtils.InverseTransformVectorToScreenSpace(newCollidedDirection.normalized) * registeredVelocity.magnitude);
+                    registeredPlayerController.RegisterCollision(newRegisteredDirection.normalized, newRegisteredSpeed, newCollidedDistance);
                 }
             }
         }

@@ -12,7 +12,6 @@ public class PlayerData : MonoBehaviour
     public LayerMask groundLayer;
     public LayerMask playerLayer;
     public float collisionTimeout;
-    public float idleFriction;
     public List<DrunkenMovementVariables> drunkenMovementVariabels = new List<DrunkenMovementVariables>();
     public GameObject floor;
     public GameObject killFloor;
@@ -25,6 +24,7 @@ public class PlayerData : MonoBehaviour
         public float smoothMoveSpeed;
         public float ramDistance;
         public float ramSpeed;
+        public float hitByRamDistance;
     }
 
     public enum DrunkLevel

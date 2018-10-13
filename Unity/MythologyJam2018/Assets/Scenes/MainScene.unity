@@ -255,6 +255,12 @@ Prefab:
       propertyPath: m_RootOrder
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 136679422785367012, guid: 1a4c81600c34a9d4c936455d769609fd,
+        type: 2}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 13400000, guid: 8d9c5364bb463b54d8e4a3707b959c7b,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1a4c81600c34a9d4c936455d769609fd, type: 2}
   m_IsPrefabAsset: 0
@@ -563,6 +569,12 @@ Prefab:
       propertyPath: m_Interpolate
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 136679422785367012, guid: 1a4c81600c34a9d4c936455d769609fd,
+        type: 2}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 13400000, guid: 8d9c5364bb463b54d8e4a3707b959c7b,
+        type: 2}
     m_RemovedComponents:
     - {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 1a4c81600c34a9d4c936455d769609fd, type: 2}
@@ -893,28 +905,31 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1024
   collisionTimeout: 0.1
-  idleFriction: 6
   drunkenMovementVariabels:
   - drunkLevel: 0
     movementSpeed: 2.5
     smoothMoveSpeed: 6
     ramDistance: 3
     ramSpeed: 8
+    hitByRamDistance: 1
   - drunkLevel: 1
     movementSpeed: 0
     smoothMoveSpeed: 0
     ramDistance: 0
     ramSpeed: 0
+    hitByRamDistance: 2
   - drunkLevel: 2
     movementSpeed: 0
     smoothMoveSpeed: 0
     ramDistance: 0
     ramSpeed: 0
+    hitByRamDistance: 5
   - drunkLevel: 3
     movementSpeed: 0
     smoothMoveSpeed: 0
     ramDistance: 0
     ramSpeed: 0
+    hitByRamDistance: 6
   floor: {fileID: 0}
   killFloor: {fileID: 0}
 --- !u!4 &1688589217
