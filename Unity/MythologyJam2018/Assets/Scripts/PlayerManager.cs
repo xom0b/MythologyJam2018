@@ -5,9 +5,6 @@ using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
 {
-    public GameObject debugSphere1;
-    public GameObject debugSphere2;
-
     private static PlayerManager instance;
 
     private class CollisionInfo
@@ -26,7 +23,6 @@ public class PlayerManager : MonoBehaviour
             return registeredCollision.name + " " + collidedWith.name;
         }
     }
-
 
     private void Awake()
     {
@@ -48,12 +44,6 @@ public class PlayerManager : MonoBehaviour
 
     Vector3 debugRay1 = new Vector3();
     Vector3 debugRay2 = new Vector3();
-
-    private void Update()
-    { 
-        Debug.DrawRay(debugSphere1.transform.position, debugRay1, Color.red);
-        Debug.DrawRay(debugSphere2.transform.position, debugRay2, Color.green);
-    }
 
     private void LateUpdate()
     {
