@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
 {
+    public GameObject debugSphere1;
+    public GameObject debugSphere2;
+
     private static PlayerManager instance;
 
     private class CollisionInfo
@@ -43,6 +46,15 @@ public class PlayerManager : MonoBehaviour
         collisionThisFrame = new CollisionInfo(registeredCollision, collidedWith);
     }
 
+    Vector3 debugRay1 = new Vector3();
+    Vector3 debugRay2 = new Vector3();
+
+    private void Update()
+    { 
+        Debug.DrawRay(debugSphere1.transform.position, debugRay1, Color.red);
+        Debug.DrawRay(debugSphere2.transform.position, debugRay2, Color.green);
+    }
+
     private void LateUpdate()
     {
         if (collisionThisFrame != null)
@@ -55,6 +67,8 @@ public class PlayerManager : MonoBehaviour
 
     private void ProcessCollision(CollisionInfo collision)
     {
+        debugSphere1.transform.position = collision.registeredCollision.transform.position;
+        debugSphere2.transform.position = collision.collidedWith.transform.position;
         // TODO: LOOK AT https://ericleong.me/research/circle-circle/#dynamic-circle-circle-collision
         PlayerController registeredPlayerController = collision.registeredCollision.GetComponent<PlayerController>();
         PlayerController collidedPlayerController = collision.collidedWith.GetComponent<PlayerController>();
@@ -70,8 +84,8 @@ public class PlayerManager : MonoBehaviour
         if (registeredRigidbody != null && collidedRigidbody != null && registeredPlayerController != null && collidedRigidbody != null)
         {
             // check out: https://gamedevelopment.tutsplus.com/tutorials/when-worlds-collide-simulating-circle-circle-collisions--gamedev-769
-            Vector3 registeredVelocity = new Vector3(registeredRigidbody.velocity.x, 0f, registeredRigidbody.velocity.z);
-            Vector3 collidedVelocity = new Vector3(collidedRigidbody.velocity.x, 0f, collidedRigidbody.velocity.z);
+            Vector3 registeredVelocity = new Vector3(registeredPlayerController.velocity.x, 0f, registeredPlayerController.velocity.z);
+            Vector3 collidedVelocity = new Vector3(collidedPlayerController.velocity.x, 0f, collidedPlayerController.velocity.z);
 
             float distance = Vector3.Distance(registeredPlayerController.transform.position, collidedPlayerController.transform.position);
 
@@ -93,8 +107,11 @@ public class PlayerManager : MonoBehaviour
             vy2 = circle2.vy + p * circle2.mass * n_y;
             */
 
-            Vector3 newRegisteredDirection = new Vector3(registeredVelocity.x - p * newX, 0f, registeredVelocity.z - p * newZ);
-            Vector3 newCollidedDirection = new Vector3(collidedVelocity.x - p * newX, 0f, collidedVelocity.z - p * newZ);
+            Vector3 newRegisteredDirection = new Vector3(collidedVelocity.x + p * newX, 0f, collidedVelocity.z + p * newZ);
+            Vector3 newCollidedDirection = new Vector3(registeredVelocity.x - p * newX, 0f, registeredVelocity.z - p * newZ);
+
+            debugRay1 = newRegisteredDirection;
+            debugRay2 = newCollidedDirection;
 
             float newRegisteredSpeed = newRegisteredDirection.magnitude;
             float newCollidedSpeed = newRegisteredDirection.magnitude;
@@ -120,12 +137,12 @@ public class PlayerManager : MonoBehaviour
                 else if (collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
                 {
                     newRegisteredSpeed = collidedPlayerController.RamSpeed;
-                    registeredPlayerController.RegisterCollision(newRegisteredDirection, newRegisteredSpeed);
+                    registeredPlayerController.RegisterCollision(IsoUtils.InverseTransformVectorToScreenSpace(newRegisteredDirection), newRegisteredSpeed);
                 }
                 else
                 {
-                    registeredPlayerController.SetMovingTowards(IsoUtils.InverseTransformVectorToScreenSpace(newRegisteredDirection.normalized) * collidedVelocity.magnitude);
-                    collidedPlayerController.SetMovingTowards(IsoUtils.InverseTransformVectorToScreenSpace(newCollidedDirection.normalized) * registeredVelocity.magnitude);
+                    //registeredPlayerController.SetMovingTowards(IsoUtils.InverseTransformVectorToScreenSpace(newRegisteredDirection.normalized) * collidedVelocity.magnitude);
+                    //collidedPlayerController.SetMovingTowards(IsoUtils.InverseTransformVectorToScreenSpace(newCollidedDirection.normalized) * registeredVelocity.magnitude);
                 }
             }
         }

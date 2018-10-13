@@ -12,6 +12,9 @@ public class PlayerController : MonoBehaviour
     public CharacterController characterController;
     public CapsuleCollider capsuleCollider;
 
+    [HideInInspector]
+    public Vector3 velocity;
+
     // rewired
     private Player player;
     private PlayerData playerData;
@@ -24,6 +27,7 @@ public class PlayerController : MonoBehaviour
     private bool groundedThisFrame = false;
 
     // movement 
+    private Vector3 positionLastFrame;
     private Vector3 movingTowards;
     private Vector3 movingVelocity;
 
@@ -53,6 +57,7 @@ public class PlayerController : MonoBehaviour
     {
         PlayerData.TryGetInstance(out playerData);
         player = ReInput.players.GetPlayer(playerId);
+        positionLastFrame = transform.position;
     }
 
     void Update()
@@ -60,8 +65,10 @@ public class PlayerController : MonoBehaviour
         GetInput();
         HandleMovement();
         playerData.debugText.text = movementState.ToString();
+        Debug.Log(gameObject.name + " velocity: " + velocity.ToString("F8"));
 
-        Debug.DrawLine(hitByRamAt, currentHitDirection * hitByRamDistance);
+        velocity = (transform.position - positionLastFrame) / Time.deltaTime;
+        positionLastFrame = transform.position;
     }
 
     public MovementState GetMovementState()
