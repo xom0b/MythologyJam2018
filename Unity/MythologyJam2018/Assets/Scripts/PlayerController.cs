@@ -55,6 +55,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        drunkLevel = PlayerData.DrunkLevel.NotDrunk;
         PlayerData.TryGetInstance(out playerData);
         player = ReInput.players.GetPlayer(playerId);
         positionLastFrame = transform.position;
@@ -118,7 +119,7 @@ public class PlayerController : MonoBehaviour
     }
 
     void HandleMovement()
-    { 
+    {
         // check if grounded
         groundedThisFrame = false;
         Debug.DrawLine(transform.position, transform.position - transform.up * (capsuleCollider.radius + 0.1f), Color.green);
@@ -141,6 +142,15 @@ public class PlayerController : MonoBehaviour
             case MovementState.HitByRam:
                 HitByRamHandler();
                 break;
+        }
+
+        if (player.GetButtonDown("X Button"))
+        {
+            ChaliceManager chaliceManager;
+            if (ChaliceManager.TryGetInstance(out chaliceManager))
+            {
+                chaliceManager.RegisterDrinkPress(this);
+            }
         }
 
         groundedLastFrame = groundedThisFrame;
@@ -249,6 +259,22 @@ public class PlayerController : MonoBehaviour
         movingTowards += mt;
     }
 
+    public void AddDrinkLevel()
+    {
+        if ((int)drunkLevel + 1 <= (int)playerData.maxDrunkLevel)
+        {
+            drunkLevel = (PlayerData.DrunkLevel)PlayerData.DrunkLevel.ToObject(typeof(PlayerData.DrunkLevel), (int)drunkLevel + 1);
+        }
+    }
+
+    public void SubtractDrunkLevel()
+    {
+        if ((int)drunkLevel - 1 >= 0)
+        {
+            drunkLevel = (PlayerData.DrunkLevel)PlayerData.DrunkLevel.ToObject(typeof(PlayerData.DrunkLevel), (int)drunkLevel - 1);
+        }
+    }
+
     #endregion
 
     private bool CheckRam()
@@ -257,6 +283,7 @@ public class PlayerController : MonoBehaviour
 
         if (inputThisFrame.aButtonDown && groundedThisFrame)
         {
+            SubtractDrunkLevel();
             ramDirection = IsoUtils.TransformVectorToScreenSpace(Vector2ToVector3(inputThisFrame.leftStick).normalized);
             startedRamAt = transform.position;
             pressedRam = true;
