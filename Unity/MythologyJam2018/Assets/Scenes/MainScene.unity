@@ -261,11 +261,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 2
       objectReference: {fileID: 0}
-    - target: {fileID: 114211234604143438, guid: 1a4c81600c34a9d4c936455d769609fd,
-        type: 2}
-      propertyPath: fillDamp
-      value: 0.2
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1a4c81600c34a9d4c936455d769609fd, type: 2}
   m_IsPrefabAsset: 0
@@ -694,6 +689,11 @@ Prefab:
       value: 
       objectReference: {fileID: 13400000, guid: 8d9c5364bb463b54d8e4a3707b959c7b,
         type: 2}
+    - target: {fileID: 114952774884816700, guid: 1a4c81600c34a9d4c936455d769609fd,
+        type: 2}
+      propertyPath: m_FillAmount
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 1a4c81600c34a9d4c936455d769609fd, type: 2}
@@ -1024,6 +1024,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1024
   collisionTimeout: 0.1
+  fallingTimeout: 2
   drunkenMovementVariabels:
   - drunkLevel: 0
     movementSpeed: 2.5

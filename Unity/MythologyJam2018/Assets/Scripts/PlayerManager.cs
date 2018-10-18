@@ -105,10 +105,12 @@ public class PlayerManager : MonoBehaviour
             {
                 if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming && collidedPlayerController.GetMovementState() == PlayerController.MovementState.HitByRam)
                 {
+                    Debug.Log("updating collision: " + newCollidedDirection);
                     collidedPlayerController.UpdateCollisionDirection(newCollidedDirection.normalized);
                 }
                 else if (collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming && registeredPlayerController.GetMovementState() == PlayerController.MovementState.HitByRam)
                 {
+                    Debug.Log("updating collision 2: " + newRegisteredDirection);
                     registeredPlayerController.UpdateCollisionDirection(newRegisteredDirection.normalized);
                 }
                 else if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
@@ -119,7 +121,7 @@ public class PlayerManager : MonoBehaviour
                 else if (collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
                 {
                     newRegisteredSpeed = collidedPlayerController.RamSpeed;
-                    registeredPlayerController.RegisterCollision(newRegisteredDirection.normalized, newRegisteredSpeed, newCollidedDistance);
+                    registeredPlayerController.RegisterCollision(newRegisteredDirection.normalized, newRegisteredSpeed, newRegisteredDistance);
                 }
             }
         }

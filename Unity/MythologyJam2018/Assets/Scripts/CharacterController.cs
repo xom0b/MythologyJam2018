@@ -4,10 +4,14 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
+    public PlayerController playerController;
     public Rigidbody attachedRigidbody;
 
     private Vector3 deltaMovement;
     private Vector3 deltaForce;
+    private Vector3 newPosition;
+
+    private bool setPositionNextFrame = false;
 
     private void FixedUpdate()
     {
@@ -22,6 +26,15 @@ public class CharacterController : MonoBehaviour
             attachedRigidbody.AddForce(deltaForce);
             deltaMovement = Vector3.zero;
         }
+
+        if (setPositionNextFrame)
+        {
+            setPositionNextFrame = false;
+            attachedRigidbody.isKinematic = true;
+            attachedRigidbody.position = newPosition;
+            attachedRigidbody.isKinematic = false;
+            playerController.FinishedResettingPosition();
+        }
     }
     
     /// <summary>
@@ -31,6 +44,12 @@ public class CharacterController : MonoBehaviour
     public void Move(Vector3 deltaMovement)
     {
         this.deltaMovement = deltaMovement;
+    }
+
+    public void SetPosition(Vector3 newPosition)
+    {
+        this.newPosition = newPosition;
+        setPositionNextFrame = true;
     }
 
     public void AddForce(Vector3 deltaForce)

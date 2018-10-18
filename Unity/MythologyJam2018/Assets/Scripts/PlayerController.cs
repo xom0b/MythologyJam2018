@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Rewired;
+using System;
 
 public class PlayerController : MonoBehaviour
 {
@@ -30,6 +31,8 @@ public class PlayerController : MonoBehaviour
     private Vector3 positionLastFrame;
     private Vector3 movingTowards;
     private Vector3 movingVelocity;
+    private float currentFallTimer;
+    private Vector3 startingPosition;
 
     // ram variables
     private Vector3 ramDirection;
@@ -43,6 +46,7 @@ public class PlayerController : MonoBehaviour
         Moving,
         Ramming,
         HitByRam,
+        Resetting
     }
 
     private struct Input
@@ -59,15 +63,39 @@ public class PlayerController : MonoBehaviour
         PlayerData.TryGetInstance(out playerData);
         player = ReInput.players.GetPlayer(playerId);
         positionLastFrame = transform.position;
+        startingPosition = transform.position;
     }
 
     void Update()
     {
         GetInput();
         HandleMovement();
+        HandleFallReset();
         playerData.debugText.text = movementState.ToString();
         velocity = (transform.position - positionLastFrame) / Time.deltaTime;
         positionLastFrame = transform.position;
+    }
+
+    private void HandleFallReset()
+    {
+        if (!groundedThisFrame)
+        {
+            currentFallTimer += Time.deltaTime;
+
+            if (currentFallTimer >= playerData.fallingTimeout)
+            {
+                characterController.SetPosition(startingPosition);
+                currentFallTimer = 0f;
+                movementState = MovementState.Resetting;
+            }
+        }
+        else
+        {
+            currentFallTimer = 0f;
+        }
+
+
+        Debug.Log("currentFallTimer: " + currentFallTimer + " groundedThisFrame: " + groundedThisFrame);
     }
 
     public MovementState GetMovementState()
@@ -78,35 +106,6 @@ public class PlayerController : MonoBehaviour
     public PlayerData.DrunkLevel DrunkLevel()
     {
         return drunkLevel;
-    }
-
-    private Vector3 collisionDirection = Vector3.zero;
-    private Vector3 collisionPoint = Vector3.zero;
-
-    private bool collidedLastFrame = false;
-    private bool collidedThisFrame = false;
-
-    private void CheckPlayerCollision()
-    {
-        collidedThisFrame = false;
-
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, capsuleCollider.radius, playerData.playerLayer);
-        if (hitColliders.Length > 0)
-        {
-            foreach (Collider collider in hitColliders)
-            {
-                if (collider.gameObject != gameObject)
-                {
-                    collidedThisFrame = true;
-                    if (collidedThisFrame && !collidedLastFrame)
-                    {
-                        OnCollision(collider);
-                    }
-                }
-            }
-        }
-
-        collidedLastFrame = collidedThisFrame;
     }
 
     private void OnCollision(Collider collider)
@@ -203,7 +202,6 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            //movingTowards = Vector3.MoveTowards(movingTowards, Vector3.zero, movingTowards.magnitude * Time.deltaTime);
             Move(new Vector3(characterController.attachedRigidbody.velocity.x, transform.position.y, characterController.attachedRigidbody.velocity.z));
         }
     }
@@ -231,6 +229,11 @@ public class PlayerController : MonoBehaviour
 
     private float collisionTimer;
 
+    public void FinishedResettingPosition()
+    {
+        movementState = MovementState.Idle;
+    }
+
     public void RegisterCollision(Vector3 newDirection, float newSpeed, float distance)
     {
         if (collisionTimer < playerData.collisionTimeout)
@@ -242,7 +245,6 @@ public class PlayerController : MonoBehaviour
             hitSpeed = newSpeed;
             Vector3 endPoint = transform.position + currentHitDirection.normalized * distance;
             hitByRamDistance = Vector3.Distance(transform.position, endPoint);
-            Debug.Log("hit by ram distance: " + hitByRamDistance);
         }
     }
 

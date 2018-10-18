@@ -12,6 +12,7 @@ public class PlayerData : MonoBehaviour
     public LayerMask groundLayer;
     public LayerMask playerLayer;
     public float collisionTimeout;
+    public float fallingTimeout;
     public List<DrunkenMovementVariables> drunkenMovementVariabels = new List<DrunkenMovementVariables>();
     public DrunkLevel maxDrunkLevel;
     public GameObject floor;
