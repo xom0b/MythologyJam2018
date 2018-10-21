@@ -53,7 +53,11 @@ public class PlayerManager : MonoBehaviour
         }
 
         collisionThisFrame = null;
+        Debug.DrawLine(debugPosition, debugPosition + debugDirection.normalized * 2f, Color.cyan);
     }
+
+    Vector3 debugPosition;
+    Vector3 debugDirection;
 
     private void ProcessCollision(CollisionInfo collision)
     {
@@ -74,15 +78,30 @@ public class PlayerManager : MonoBehaviour
             Vector3 registeredVelocity = new Vector3(registeredPlayerController.velocity.x, 0f, registeredPlayerController.velocity.z);
             Vector3 collidedVelocity = new Vector3(collidedPlayerController.velocity.x, 0f, collidedPlayerController.velocity.z);
 
+            /*
+            
+            READ THIS CAREFULLY
+
+            double d = Math.sqrt(Math.pow(cx1 - cx2, 2) + Math.pow(cy1 - cy2, 2)); 
+            double nx = (cx2 - cx1) / d; 
+            double ny = (cy2 - cy1) / d; 
+            double p = 2 * (circle1.vx * nx + circle1.vy * n_y - circle2.vx * nx - circle2.vy * n_y) / 
+                    (circle1.mass + circle2.mass); 
+            vx1 = circle1.vx - p * circle1.mass * n_x; 
+            vy1 = circle1.vy - p * circle1.mass * n_y; 
+            vx2 = circle2.vx + p * circle2.mass * n_x; 
+            vy2 = circle2.vy + p * circle2.mass * n_y;
+            */
+
             float distance = Vector3.Distance(registeredPlayerController.transform.position, collidedPlayerController.transform.position);
 
             float newX = (collidedPlayerController.transform.position.x - registeredPlayerController.transform.position.x) / distance;
-            float newZ = (registeredPlayerController.transform.position.z - collidedPlayerController.transform.position.z) / distance;
+            float newZ = (collidedPlayerController.transform.position.z - registeredPlayerController.transform.position.z) / distance;
             
             float p = registeredVelocity.x * newX + registeredVelocity.z * newZ - collidedVelocity.x * newX - collidedVelocity.z * newZ;
 
-            Vector3 newRegisteredDirection = new Vector3(collidedVelocity.x + p * newX, 0f, collidedVelocity.z + p * newZ).normalized;
-            Vector3 newCollidedDirection = new Vector3(registeredVelocity.x - p * newX, 0f, registeredVelocity.z - p * newZ).normalized;
+            Vector3 newRegisteredDirection = new Vector3(registeredVelocity.x - p * newX, 0f, registeredVelocity.z - p * newZ).normalized;
+            Vector3 newCollidedDirection = new Vector3(collidedVelocity.x + p * newX, 0f, collidedVelocity.z + p * newZ).normalized;
 
             float newRegisteredDistance = registeredPlayerController.HitByRamDistance;
             float newCollidedDistance = registeredPlayerController.HitByRamDistance;
@@ -115,15 +134,34 @@ public class PlayerManager : MonoBehaviour
                 }
                 else if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
                 {
-                    newCollidedSpeed = registeredPlayerController.RamSpeed;
+                    newCollidedSpeed = registeredPlayerController.HitByRamSpeed;
+
+                    debugSphere1.transform.position = collidedPlayerController.transform.position;
+                    debugSphere2.transform.position = registeredPlayerController.transform.position;
+
+                    debugPosition = collidedPlayerController.transform.position;
+                    debugDirection = newCollidedDirection.normalized;
+                    Debug.Log("debugDirection: " + debugDirection);
+
                     collidedPlayerController.RegisterCollision(newCollidedDirection.normalized, newCollidedSpeed, newCollidedDistance);
                 }
                 else if (collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
                 {
-                    newRegisteredSpeed = collidedPlayerController.RamSpeed;
+                    newRegisteredSpeed = collidedPlayerController.HitByRamSpeed;
+
+                    debugSphere1.transform.position = collidedPlayerController.transform.position;
+                    debugSphere2.transform.position = registeredPlayerController.transform.position;
+
+                    debugPosition = registeredPlayerController.transform.position;
+                    debugDirection = newRegisteredDirection.normalized;
+                    Debug.Log("debugDirection: " + debugDirection);
+
                     registeredPlayerController.RegisterCollision(newRegisteredDirection.normalized, newRegisteredSpeed, newRegisteredDistance);
                 }
             }
         }
     }
+
+    public GameObject debugSphere1;
+    public GameObject debugSphere2;
 }

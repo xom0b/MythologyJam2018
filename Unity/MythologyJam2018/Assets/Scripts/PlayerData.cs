@@ -27,6 +27,7 @@ public class PlayerData : MonoBehaviour
         public float ramDistance;
         public float ramSpeed;
         public float hitByRamDistance;
+        public float hitByRamSpeed; // speed when you get hit by the ram at this level
     }
 
     public enum DrunkLevel

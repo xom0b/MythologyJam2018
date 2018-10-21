@@ -74,6 +74,8 @@ public class PlayerController : MonoBehaviour
         playerData.debugText.text = movementState.ToString();
         velocity = (transform.position - positionLastFrame) / Time.deltaTime;
         positionLastFrame = transform.position;
+
+        Debug.DrawRay(transform.position, velocity);
     }
 
     private void HandleFallReset()
@@ -93,9 +95,6 @@ public class PlayerController : MonoBehaviour
         {
             currentFallTimer = 0f;
         }
-
-
-        Debug.Log("currentFallTimer: " + currentFallTimer + " groundedThisFrame: " + groundedThisFrame);
     }
 
     public MovementState GetMovementState()
@@ -253,6 +252,8 @@ public class PlayerController : MonoBehaviour
         if (movementState == MovementState.HitByRam)
         {
             currentHitDirection = newDirection;
+            hitByRamDistance -= Vector3.Distance(hitByRamAt, transform.position);
+            hitByRamAt = transform.position;
         }
     }
 
@@ -416,7 +417,23 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("Tried getting RamDistance with no PlayerData", gameObject);
+                Debug.LogWarning("Tried getting HitByRamDistance with no PlayerData", gameObject);
+                return 0;
+            }
+        }
+    }
+
+    public float HitByRamSpeed
+    {
+        get
+        {
+            if (playerData)
+            {
+                return playerData.drunkenMovementVariabels[(int)drunkLevel].hitByRamSpeed;
+            }
+            else
+            {
+                Debug.LogWarning("Tried getting HitByRamSpeed with no PlayerData", gameObject);
                 return 0;
             }
         }
