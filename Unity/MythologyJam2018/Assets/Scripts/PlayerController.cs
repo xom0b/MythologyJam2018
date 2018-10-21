@@ -170,8 +170,7 @@ public class PlayerController : MonoBehaviour
 
         if (currentRamDistance >= RamDistance)
         {
-            movementState = MovementState.Moving;
-            movingTowards = IsoUtils.InverseTransformVectorToScreenSpace(ramDirection.normalized);
+            EndRam();
         }
         else
         {
@@ -231,6 +230,12 @@ public class PlayerController : MonoBehaviour
     public void FinishedResettingPosition()
     {
         movementState = MovementState.Idle;
+    }
+
+    public void EndRam()
+    {
+        movementState = MovementState.Moving;
+        movingTowards = IsoUtils.InverseTransformVectorToScreenSpace(ramDirection.normalized);
     }
 
     public void RegisterCollision(Vector3 newDirection, float newSpeed, float distance)

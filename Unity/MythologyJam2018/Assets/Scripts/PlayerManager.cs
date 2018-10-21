@@ -144,6 +144,7 @@ public class PlayerManager : MonoBehaviour
                     Debug.Log("debugDirection: " + debugDirection);
 
                     collidedPlayerController.RegisterCollision(newCollidedDirection.normalized, newCollidedSpeed, newCollidedDistance);
+                    registeredPlayerController.EndRam();
                 }
                 else if (collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
                 {
@@ -157,6 +158,7 @@ public class PlayerManager : MonoBehaviour
                     Debug.Log("debugDirection: " + debugDirection);
 
                     registeredPlayerController.RegisterCollision(newRegisteredDirection.normalized, newRegisteredSpeed, newRegisteredDistance);
+                    collidedPlayerController.EndRam();
                 }
             }
         }
