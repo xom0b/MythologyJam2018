@@ -112,7 +112,7 @@ public class PlayerController : MonoBehaviour
         PlayerManager playerManager;
         if (PlayerManager.TryGetInstance(out playerManager))
         {
-            playerManager.RegisterCollisionThisFrame(gameObject, collider.gameObject);
+            playerManager.RegisterPlayerPlayerCollisionThisFrame(gameObject, collider.gameObject);
         }
     }
 
@@ -234,6 +234,7 @@ public class PlayerController : MonoBehaviour
 
     public void EndRam()
     {
+        ramDistanceModifier = 0f;
         movementState = MovementState.Moving;
         movingTowards = IsoUtils.InverseTransformVectorToScreenSpace(ramDirection.normalized);
     }
@@ -252,13 +253,25 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void UpdateCollisionDirection(Vector3 newDirection)
+    public void UpdateHitByRamDirection(Vector3 newDirection)
     {
         if (movementState == MovementState.HitByRam)
         {
             currentHitDirection = newDirection;
             hitByRamDistance -= Vector3.Distance(hitByRamAt, transform.position);
             hitByRamAt = transform.position;
+        }
+    }
+
+    private float ramDistanceModifier = 0f;
+
+    public void UpdateRamDirection(Vector3 newDirection)
+    {
+        if (movementState == MovementState.Ramming)
+        {
+            ramDistanceModifier = Vector3.Distance(startedRamAt, transform.position);
+            ramDirection = newDirection;
+            startedRamAt = transform.position;
         }
     }
 
@@ -342,7 +355,7 @@ public class PlayerController : MonoBehaviour
             PlayerManager playerManager;
             if (PlayerManager.TryGetInstance(out playerManager))
             {
-                playerManager.RegisterCollisionThisFrame(gameObject, collision.gameObject);
+                playerManager.RegisterPlayerPlayerCollisionThisFrame(gameObject, collision.gameObject);
             }
         }
     }
@@ -402,7 +415,7 @@ public class PlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariabels[(int)drunkLevel].ramDistance;
+                return playerData.drunkenMovementVariabels[(int)drunkLevel].ramDistance - ramDistanceModifier;
             }
             else
             {

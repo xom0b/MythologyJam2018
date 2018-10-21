@@ -7,12 +7,14 @@ public class PlayerManager : MonoBehaviour
 {
     private static PlayerManager instance;
 
-    private class CollisionInfo
+    public bool showDebug;
+
+    private class PlayerPlayerCollisionInfo
     {
         public GameObject registeredCollision;
         public GameObject collidedWith;
 
-        public CollisionInfo(GameObject registeredCollision, GameObject collidedWith)
+        public PlayerPlayerCollisionInfo(GameObject registeredCollision, GameObject collidedWith)
         {
             this.registeredCollision = registeredCollision;
             this.collidedWith = collidedWith;
@@ -21,6 +23,23 @@ public class PlayerManager : MonoBehaviour
         public override string ToString()
         {
             return registeredCollision.name + " " + collidedWith.name;
+        }
+    }
+
+    private class PlayerChaliceCollisionInfo
+    {
+        public GameObject chalice;
+        public GameObject player;
+
+        public PlayerChaliceCollisionInfo(GameObject chalice, GameObject player)
+        {
+            this.chalice = chalice;
+            this.player = player;
+        }
+
+        public override string ToString()
+        {
+            return chalice.name + " " + player.name;
         }
     }
 
@@ -35,31 +54,93 @@ public class PlayerManager : MonoBehaviour
         return manager != null;
     }
 
-    private CollisionInfo collisionThisFrame = null;
+    private PlayerPlayerCollisionInfo playerPlayerCollisionThisFrame = null;
     
-    public void RegisterCollisionThisFrame(GameObject registeredCollision, GameObject collidedWith)
+    public void RegisterPlayerPlayerCollisionThisFrame(GameObject registeredCollision, GameObject collidedWith)
     {
-        collisionThisFrame = new CollisionInfo(registeredCollision, collidedWith);
+        playerPlayerCollisionThisFrame = new PlayerPlayerCollisionInfo(registeredCollision, collidedWith);
     }
 
-    Vector3 debugRay1 = new Vector3();
-    Vector3 debugRay2 = new Vector3();
+    private List<PlayerChaliceCollisionInfo> playerChaliceCollisionsThisFrame = new List<PlayerChaliceCollisionInfo>();
+
+    public void RegisterPlayerChaliceCollisionThisFrame(GameObject chalice, GameObject player)
+    {
+        playerChaliceCollisionsThisFrame.Add(new PlayerChaliceCollisionInfo(chalice, player));
+    }
+
+    private void Start()
+    {
+        if (showDebug)
+        {
+            debugSphere1.SetActive(true);
+            debugSphere2.SetActive(true);
+        }
+        else
+        {
+            debugSphere1.SetActive(false);
+            debugSphere2.SetActive(false);
+        }
+    }
 
     private void LateUpdate()
     {
-        if (collisionThisFrame != null)
+        if (playerPlayerCollisionThisFrame != null)
         {
-            ProcessCollision(collisionThisFrame);
+            ProcessPlayerPlayerCollision(playerPlayerCollisionThisFrame);
         }
 
-        collisionThisFrame = null;
+        if (playerChaliceCollisionsThisFrame.Count > 0)
+        {
+            foreach(PlayerChaliceCollisionInfo playerChaliceCollision in playerChaliceCollisionsThisFrame)
+            {
+                ProcessPlayerChaliceCollision(playerChaliceCollision);
+            }
+        }
+
+        playerChaliceCollisionsThisFrame.Clear();
+        playerPlayerCollisionThisFrame = null;
         Debug.DrawLine(debugPosition, debugPosition + debugDirection.normalized * 2f, Color.cyan);
     }
 
     Vector3 debugPosition;
     Vector3 debugDirection;
 
-    private void ProcessCollision(CollisionInfo collision)
+    private void ProcessPlayerChaliceCollision(PlayerChaliceCollisionInfo collision)
+    {
+        PlayerController playerController = collision.player.GetComponent<PlayerController>();
+
+        /*
+        double d = Math.sqrt(Math.pow(cx1 - cx2, 2) + Math.pow(cy1 - cy2, 2));
+        double nx = (cx2 - cx1) / d;
+        double ny = (cy2 - cy1) / d;
+        double p = 2 * (circle1.vx * nx + circle1.vy * n_y - circle2.vx * nx - circle2.vy * n_y) /
+                (circle1.mass + circle2.mass);
+        vx1 = circle1.vx - p * circle1.mass * n_x;
+        vy1 = circle1.vy - p * circle1.mass * n_y;
+        vx2 = circle2.vx + p * circle2.mass * n_x;
+        vy2 = circle2.vy + p * circle2.mass * n_y;
+        */
+
+        float distance = Vector3.Distance(playerController.transform.position, collision.chalice.transform.position);
+
+        float newX = (collision.chalice.transform.position.x - playerController.transform.position.x) / distance;
+        float newZ = (collision.chalice.transform.position.z - playerController.transform.position.z) / distance;
+
+        float p = playerController.velocity.x * newX + playerController.velocity.z * newZ;
+
+        Vector3 newRegisteredDirection = new Vector3(playerController.velocity.x - p * newX, 0f, playerController.velocity.z - p * newZ).normalized;
+        
+        if (playerController.GetMovementState() == PlayerController.MovementState.HitByRam)
+        {
+            playerController.UpdateHitByRamDirection(newRegisteredDirection);
+        }
+        else if (playerController.GetMovementState() == PlayerController.MovementState.Ramming)
+        {
+            playerController.UpdateRamDirection(newRegisteredDirection);
+        }
+    }
+
+    private void ProcessPlayerPlayerCollision(PlayerPlayerCollisionInfo collision)
     {
         PlayerController registeredPlayerController = collision.registeredCollision.GetComponent<PlayerController>();
         PlayerController collidedPlayerController = collision.collidedWith.GetComponent<PlayerController>();
@@ -125,12 +206,12 @@ public class PlayerManager : MonoBehaviour
                 if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming && collidedPlayerController.GetMovementState() == PlayerController.MovementState.HitByRam)
                 {
                     Debug.Log("updating collision: " + newCollidedDirection);
-                    collidedPlayerController.UpdateCollisionDirection(newCollidedDirection.normalized);
+                    collidedPlayerController.UpdateHitByRamDirection(newCollidedDirection.normalized);
                 }
                 else if (collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming && registeredPlayerController.GetMovementState() == PlayerController.MovementState.HitByRam)
                 {
                     Debug.Log("updating collision 2: " + newRegisteredDirection);
-                    registeredPlayerController.UpdateCollisionDirection(newRegisteredDirection.normalized);
+                    registeredPlayerController.UpdateHitByRamDirection(newRegisteredDirection.normalized);
                 }
                 else if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
                 {
@@ -141,7 +222,6 @@ public class PlayerManager : MonoBehaviour
 
                     debugPosition = collidedPlayerController.transform.position;
                     debugDirection = newCollidedDirection.normalized;
-                    Debug.Log("debugDirection: " + debugDirection);
 
                     collidedPlayerController.RegisterCollision(newCollidedDirection.normalized, newCollidedSpeed, newCollidedDistance);
                     registeredPlayerController.EndRam();
@@ -155,7 +235,6 @@ public class PlayerManager : MonoBehaviour
 
                     debugPosition = registeredPlayerController.transform.position;
                     debugDirection = newRegisteredDirection.normalized;
-                    Debug.Log("debugDirection: " + debugDirection);
 
                     registeredPlayerController.RegisterCollision(newRegisteredDirection.normalized, newRegisteredSpeed, newRegisteredDistance);
                     collidedPlayerController.EndRam();

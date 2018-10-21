@@ -108,7 +108,7 @@ public class RigidbodyPlayerController : MonoBehaviour
         PlayerManager playerManager;
         if (PlayerManager.TryGetInstance(out playerManager))
         {
-            playerManager.RegisterCollisionThisFrame(gameObject, collider.gameObject);
+            playerManager.RegisterPlayerPlayerCollisionThisFrame(gameObject, collider.gameObject);
         }
     }
 
@@ -291,7 +291,7 @@ public class RigidbodyPlayerController : MonoBehaviour
             PlayerManager playerManager;
             if(PlayerManager.TryGetInstance(out playerManager))
             {
-                playerManager.RegisterCollisionThisFrame(gameObject, collision.gameObject);
+                playerManager.RegisterPlayerPlayerCollisionThisFrame(gameObject, collision.gameObject);
             }
         }
     }

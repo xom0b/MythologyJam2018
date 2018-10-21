@@ -42,6 +42,15 @@ public class ChaliceController : MonoBehaviour
         }
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        PlayerManager playerManager;
+        if (PlayerManager.TryGetInstance(out playerManager))
+        {
+            playerManager.RegisterPlayerChaliceCollisionThisFrame(gameObject, collision.gameObject);
+        }
+    }
+
     private void Start()
     {
         currentChaliceRefillTime = chaliceRefillTime;
