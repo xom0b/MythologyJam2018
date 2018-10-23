@@ -38,8 +38,19 @@ public class PlayerController : MonoBehaviour
     private Vector3 ramDirection;
     private Vector3 startedRamAt = new Vector3();
 
+    // collision variables
+    private Vector3 currentHitDirection;
+    private Vector3 hitByRamAt;
+    private float hitSpeed;
+    private float hitByRamDistance;
+    private float ramDistanceModifier;
+
+    private float collisionTimer;
+
+    // debug variabels
     private Vector3 debugRay = new Vector3();
 
+    #region Structs, Enums, Classes, 
     public enum MovementState
     {
         Idle,
@@ -56,7 +67,9 @@ public class PlayerController : MonoBehaviour
         public bool aButtonDown;
         public bool aButtonUp;
     }
+    #endregion
 
+    #region MonoBehaviour
     void Start()
     {
         drunkLevel = PlayerData.DrunkLevel.NotDrunk;
@@ -74,37 +87,6 @@ public class PlayerController : MonoBehaviour
         playerData.debugText.text = movementState.ToString();
         velocity = (transform.position - positionLastFrame) / Time.deltaTime;
         positionLastFrame = transform.position;
-
-        Debug.DrawRay(transform.position, velocity);
-    }
-
-    private void HandleFallReset()
-    {
-        if (!groundedThisFrame)
-        {
-            currentFallTimer += Time.deltaTime;
-
-            if (currentFallTimer >= playerData.fallingTimeout)
-            {
-                characterController.SetPosition(startingPosition);
-                currentFallTimer = 0f;
-                movementState = MovementState.Resetting;
-            }
-        }
-        else
-        {
-            currentFallTimer = 0f;
-        }
-    }
-
-    public MovementState GetMovementState()
-    {
-        return movementState;
-    }
-
-    public PlayerData.DrunkLevel DrunkLevel()
-    {
-        return drunkLevel;
     }
 
     private void OnCollision(Collider collider)
@@ -115,8 +97,10 @@ public class PlayerController : MonoBehaviour
             playerManager.RegisterPlayerPlayerCollisionThisFrame(gameObject, collider.gameObject);
         }
     }
+    #endregion
 
-    void HandleMovement()
+    #region Private Methods
+    private void HandleMovement()
     {
         // check if grounded
         groundedThisFrame = false;
@@ -154,7 +138,24 @@ public class PlayerController : MonoBehaviour
         groundedLastFrame = groundedThisFrame;
     }
 
-    #region State Handlers
+    private void HandleFallReset()
+    {
+        if (!groundedThisFrame)
+        {
+            currentFallTimer += Time.deltaTime;
+
+            if (currentFallTimer >= playerData.fallingTimeout)
+            {
+                characterController.SetPosition(startingPosition);
+                currentFallTimer = 0f;
+                movementState = MovementState.Resetting;
+            }
+        }
+        else
+        {
+            currentFallTimer = 0f;
+        }
+    }
 
     private void IdleHandler()
     {
@@ -220,84 +221,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private Vector3 currentHitDirection;
-    private Vector3 hitByRamAt;
-    private float hitSpeed;
-    private float hitByRamDistance;
-
-    private float collisionTimer;
-
-    public void FinishedResettingPosition()
-    {
-        movementState = MovementState.Idle;
-    }
-
-    public void EndRam()
-    {
-        ramDistanceModifier = 0f;
-        movementState = MovementState.Moving;
-        movingTowards = IsoUtils.InverseTransformVectorToScreenSpace(ramDirection.normalized);
-    }
-
-    public void RegisterCollision(Vector3 newDirection, float newSpeed, float distance)
-    {
-        if (collisionTimer < playerData.collisionTimeout)
-        {
-            hitByRamAt = transform.position;
-            movementState = MovementState.HitByRam;
-            collisionTimer = 0f;
-            currentHitDirection = newDirection;
-            hitSpeed = newSpeed;
-            Vector3 endPoint = transform.position + currentHitDirection.normalized * distance;
-            hitByRamDistance = Vector3.Distance(transform.position, endPoint);
-        }
-    }
-
-    public void UpdateHitByRamDirection(Vector3 newDirection)
-    {
-        if (movementState == MovementState.HitByRam)
-        {
-            currentHitDirection = newDirection;
-            hitByRamDistance -= Vector3.Distance(hitByRamAt, transform.position);
-            hitByRamAt = transform.position;
-        }
-    }
-
-    private float ramDistanceModifier = 0f;
-
-    public void UpdateRamDirection(Vector3 newDirection)
-    {
-        if (movementState == MovementState.Ramming)
-        {
-            ramDistanceModifier = Vector3.Distance(startedRamAt, transform.position);
-            ramDirection = newDirection;
-            startedRamAt = transform.position;
-        }
-    }
-
-    public void SetMovingTowards(Vector3 mt)
-    {
-        movingTowards += mt;
-    }
-
-    public void AddDrinkLevel()
-    {
-        if ((int)drunkLevel + 1 <= (int)playerData.maxDrunkLevel)
-        {
-            drunkLevel = (PlayerData.DrunkLevel)PlayerData.DrunkLevel.ToObject(typeof(PlayerData.DrunkLevel), (int)drunkLevel + 1);
-        }
-    }
-
-    public void SubtractDrunkLevel()
-    {
-        if ((int)drunkLevel - 1 >= 0)
-        {
-            drunkLevel = (PlayerData.DrunkLevel)PlayerData.DrunkLevel.ToObject(typeof(PlayerData.DrunkLevel), (int)drunkLevel - 1);
-        }
-    }
-
-    #endregion
-
     private bool CheckRam()
     {
         bool pressedRam = false;
@@ -347,6 +270,75 @@ public class PlayerController : MonoBehaviour
     {
         return new Vector3(vector.x, 0f, vector.y);
     }
+    #endregion
+
+    #region Public Methods
+    public void FinishedResettingPosition()
+    {
+        movementState = MovementState.Idle;
+    }
+
+    public void EndRam()
+    {
+        ramDistanceModifier = 0f;
+        movementState = MovementState.Moving;
+        movingTowards = IsoUtils.InverseTransformVectorToScreenSpace(ramDirection.normalized);
+    }
+
+    public void RegisterCollision(Vector3 newDirection, float newSpeed, float distance)
+    {
+        if (collisionTimer < playerData.collisionTimeout)
+        {
+            hitByRamAt = transform.position;
+            movementState = MovementState.HitByRam;
+            collisionTimer = 0f;
+            currentHitDirection = newDirection;
+            hitSpeed = newSpeed;
+            Vector3 endPoint = transform.position + currentHitDirection.normalized * distance;
+            hitByRamDistance = Vector3.Distance(transform.position, endPoint);
+        }
+    }
+
+    public void UpdateHitByRamDirection(Vector3 newDirection)
+    {
+        if (movementState == MovementState.HitByRam)
+        {
+            currentHitDirection = newDirection;
+            hitByRamDistance -= Vector3.Distance(hitByRamAt, transform.position);
+            hitByRamAt = transform.position;
+        }
+    }
+
+    public void UpdateRamDirection(Vector3 newDirection)
+    {
+        if (movementState == MovementState.Ramming)
+        {
+            ramDistanceModifier = Vector3.Distance(startedRamAt, transform.position);
+            ramDirection = newDirection;
+            startedRamAt = transform.position;
+        }
+    }
+
+    public void SetMovingTowards(Vector3 mt)
+    {
+        movingTowards += mt;
+    }
+
+    public void AddDrunkLevel()
+    {
+        if ((int)drunkLevel + 1 <= (int)playerData.maxDrunkLevel)
+        {
+            drunkLevel = (PlayerData.DrunkLevel)PlayerData.DrunkLevel.ToObject(typeof(PlayerData.DrunkLevel), (int)drunkLevel + 1);
+        }
+    }
+
+    public void SubtractDrunkLevel()
+    {
+        if ((int)drunkLevel - 1 >= 0)
+        {
+            drunkLevel = (PlayerData.DrunkLevel)PlayerData.DrunkLevel.ToObject(typeof(PlayerData.DrunkLevel), (int)drunkLevel - 1);
+        }
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -359,8 +351,19 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+    #endregion
 
     #region Properties
+    public MovementState GetMovementState()
+    {
+        return movementState;
+    }
+
+    public PlayerData.DrunkLevel DrunkLevel()
+    {
+        return drunkLevel;
+    }
+
     private float MoveSpeed
     {
         get

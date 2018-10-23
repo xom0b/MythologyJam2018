@@ -30,7 +30,7 @@ public class ChaliceManager : MonoBehaviour
                 {
                     if (player.DrunkLevel() != playerData.maxDrunkLevel && chalice.Drink())
                     {
-                        player.AddDrinkLevel();
+                        player.AddDrunkLevel();
                     }
 
                     break;

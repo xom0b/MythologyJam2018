@@ -7,6 +7,7 @@ public class CharacterController : MonoBehaviour
     public PlayerController playerController;
     public Rigidbody attachedRigidbody;
 
+    // movement
     private Vector3 deltaMovement;
     private Vector3 deltaForce;
     private Vector3 newPosition;

@@ -5,10 +5,20 @@ using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
 {
-    private static PlayerManager instance;
-
+    [Header("Debug")]
     public bool showDebug;
+    public GameObject debugSphere1;
+    public GameObject debugSphere2;
 
+    // private variables
+    private PlayerPlayerCollisionInfo playerPlayerCollisionThisFrame = null;
+    private List<PlayerChaliceCollisionInfo> playerChaliceCollisionsThisFrame = new List<PlayerChaliceCollisionInfo>();
+
+    // private debug
+    private Vector3 debugPosition;
+    private Vector3 debugDirection;
+
+    #region Classes
     private class PlayerPlayerCollisionInfo
     {
         public GameObject registeredCollision;
@@ -42,6 +52,10 @@ public class PlayerManager : MonoBehaviour
             return chalice.name + " " + player.name;
         }
     }
+    #endregion
+
+    #region Singleton
+    private static PlayerManager instance;
 
     private void Awake()
     {
@@ -53,20 +67,9 @@ public class PlayerManager : MonoBehaviour
         manager = instance;
         return manager != null;
     }
+    #endregion
 
-    private PlayerPlayerCollisionInfo playerPlayerCollisionThisFrame = null;
-    
-    public void RegisterPlayerPlayerCollisionThisFrame(GameObject registeredCollision, GameObject collidedWith)
-    {
-        playerPlayerCollisionThisFrame = new PlayerPlayerCollisionInfo(registeredCollision, collidedWith);
-    }
-
-    private List<PlayerChaliceCollisionInfo> playerChaliceCollisionsThisFrame = new List<PlayerChaliceCollisionInfo>();
-
-    public void RegisterPlayerChaliceCollisionThisFrame(GameObject chalice, GameObject player)
-    {
-        playerChaliceCollisionsThisFrame.Add(new PlayerChaliceCollisionInfo(chalice, player));
-    }
+    #region MoboBehaviour
 
     private void Start()
     {
@@ -102,8 +105,22 @@ public class PlayerManager : MonoBehaviour
         Debug.DrawLine(debugPosition, debugPosition + debugDirection.normalized * 2f, Color.cyan);
     }
 
-    Vector3 debugPosition;
-    Vector3 debugDirection;
+    #endregion
+
+
+    #region Public Methods
+    public void RegisterPlayerPlayerCollisionThisFrame(GameObject registeredCollision, GameObject collidedWith)
+    {
+        playerPlayerCollisionThisFrame = new PlayerPlayerCollisionInfo(registeredCollision, collidedWith);
+    }
+
+    public void RegisterPlayerChaliceCollisionThisFrame(GameObject chalice, GameObject player)
+    {
+        playerChaliceCollisionsThisFrame.Add(new PlayerChaliceCollisionInfo(chalice, player));
+    }
+    #endregion
+
+    #region Collision Processing
 
     private void ProcessPlayerChaliceCollision(PlayerChaliceCollisionInfo collision)
     {
@@ -160,7 +177,6 @@ public class PlayerManager : MonoBehaviour
             Vector3 collidedVelocity = new Vector3(collidedPlayerController.velocity.x, 0f, collidedPlayerController.velocity.z);
 
             /*
-            
             READ THIS CAREFULLY
 
             double d = Math.sqrt(Math.pow(cx1 - cx2, 2) + Math.pow(cy1 - cy2, 2)); 
@@ -190,6 +206,7 @@ public class PlayerManager : MonoBehaviour
             float newRegisteredSpeed = 0f;
             float newCollidedSpeed = 0f;
 
+            // RAM V RAM COLLISION
             if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming && collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
             {
                 newRegisteredSpeed = collidedPlayerController.RamSpeed / registeredPlayerController.RamSpeed;
@@ -203,46 +220,30 @@ public class PlayerManager : MonoBehaviour
             }
             else
             {
+                // RAM V HIT BY RAM
                 if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming && collidedPlayerController.GetMovementState() == PlayerController.MovementState.HitByRam)
                 {
-                    Debug.Log("updating collision: " + newCollidedDirection);
                     collidedPlayerController.UpdateHitByRamDirection(newCollidedDirection.normalized);
                 }
                 else if (collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming && registeredPlayerController.GetMovementState() == PlayerController.MovementState.HitByRam)
                 {
-                    Debug.Log("updating collision 2: " + newRegisteredDirection);
                     registeredPlayerController.UpdateHitByRamDirection(newRegisteredDirection.normalized);
                 }
+                // RAM V MOVING NORMALLY
                 else if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
                 {
                     newCollidedSpeed = registeredPlayerController.HitByRamSpeed;
-
-                    debugSphere1.transform.position = collidedPlayerController.transform.position;
-                    debugSphere2.transform.position = registeredPlayerController.transform.position;
-
-                    debugPosition = collidedPlayerController.transform.position;
-                    debugDirection = newCollidedDirection.normalized;
-
                     collidedPlayerController.RegisterCollision(newCollidedDirection.normalized, newCollidedSpeed, newCollidedDistance);
-                    registeredPlayerController.EndRam();
+                    registeredPlayerController.EndRam(); // this feels better, but is subject to change
                 }
                 else if (collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
                 {
-                    newRegisteredSpeed = collidedPlayerController.HitByRamSpeed;
-
-                    debugSphere1.transform.position = collidedPlayerController.transform.position;
-                    debugSphere2.transform.position = registeredPlayerController.transform.position;
-
-                    debugPosition = registeredPlayerController.transform.position;
-                    debugDirection = newRegisteredDirection.normalized;
-
+                    newRegisteredSpeed = collidedPlayerController.HitByRamSpeed; 
                     registeredPlayerController.RegisterCollision(newRegisteredDirection.normalized, newRegisteredSpeed, newRegisteredDistance);
-                    collidedPlayerController.EndRam();
+                    collidedPlayerController.EndRam(); // this feels better, but is subject to change
                 }
             }
         }
     }
-
-    public GameObject debugSphere1;
-    public GameObject debugSphere2;
+    #endregion
 }
