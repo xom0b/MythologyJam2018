@@ -209,8 +209,8 @@ public class PlayerManager : MonoBehaviour
             // RAM V RAM COLLISION
             if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming && collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
             {
-                newRegisteredSpeed = collidedPlayerController.RamSpeed / registeredPlayerController.RamSpeed;
-                newCollidedSpeed = registeredPlayerController.RamSpeed / collidedPlayerController.RamSpeed;
+                newRegisteredSpeed = collidedPlayerController.HitByRamSpeed / registeredPlayerController.HitByRamSpeed;
+                newCollidedSpeed = registeredPlayerController.HitByRamSpeed / collidedPlayerController.HitByRamSpeed;
 
                 newRegisteredDistance = collidedPlayerController.HitByRamDistance / registeredPlayerController.HitByRamDistance;
                 newCollidedDistance = registeredPlayerController.HitByRamDistance / collidedPlayerController.HitByRamDistance;

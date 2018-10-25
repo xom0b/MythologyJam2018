@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 1905632936562834}
+  m_IsPrefabAsset: 1
+--- !u!1 &1905632936562834
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4861121383518338}
+  - component: {fileID: 114002359923649590}
+  - component: {fileID: 114779397876071000}
+  m_Layer: 0
+  m_Name: PlayerData
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4861121383518338
+Transform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1905632936562834}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.44665527, y: -1.8522924, z: 0.66040814}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114002359923649590
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1905632936562834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75ff30347a6c4d341a89d393fc8993d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugText: {fileID: 0}
+  isoOrientation: {fileID: 0}
+  gravity: {x: 0, y: -9.81, z: 0}
+  boxCheckHalfExtents: {x: 0.375, y: 0.375, z: 0.375}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 1024
+  collisionTimeout: 0.1
+  fallingTimeout: 2
+  drunkenMovementVariables:
+  - drunkLevel: 0
+    movementSpeed: 2.5
+    smoothMoveSpeed: 6
+    ramDistance: 3
+    ramSpeed: 8
+    hitByRamDistance: 2
+    hitByRamSpeed: 10
+  - drunkLevel: 1
+    movementSpeed: 4.92
+    smoothMoveSpeed: 3
+    ramDistance: 3
+    ramSpeed: 8
+    hitByRamDistance: 3
+    hitByRamSpeed: 12
+  - drunkLevel: 2
+    movementSpeed: 3.5
+    smoothMoveSpeed: 3
+    ramDistance: 3
+    ramSpeed: 8
+    hitByRamDistance: 4
+    hitByRamSpeed: 14
+  - drunkLevel: 3
+    movementSpeed: 4
+    smoothMoveSpeed: 2
+    ramDistance: 3
+    ramSpeed: 8
+    hitByRamDistance: 5
+    hitByRamSpeed: 16
+  maxDrunkLevel: 3
+  floor: {fileID: 0}
+  killFloor: {fileID: 0}
+--- !u!114 &114779397876071000
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1905632936562834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04e2198544310ae45a425af2f37d972e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showDebug: 0
+  debugSphere1: {fileID: 0}
+  debugSphere2: {fileID: 0}

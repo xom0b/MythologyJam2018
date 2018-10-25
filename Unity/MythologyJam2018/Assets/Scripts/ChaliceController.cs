@@ -26,6 +26,8 @@ public class ChaliceController : MonoBehaviour
 
         playerIsInTriggerZone = true;
         playerControllersInPickupZone.Add(playerController);
+
+        Debug.Log("Chalice: " + gameObject.name + " added: " + playerController.gameObject.name);
     }
 
     public void OnExitTriggerZone(PlayerController playerController)

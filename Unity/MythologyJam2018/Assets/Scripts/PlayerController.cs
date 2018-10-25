@@ -246,7 +246,7 @@ public class PlayerController : MonoBehaviour
             stickDirection = Vector2ToVector3(inputThisFrame.leftStick).normalized;
         }
 
-        Vector3 stickMovement = Vector3.MoveTowards(movingTowards, stickDirection, MoveSpeed * Time.deltaTime);
+        Vector3 stickMovement = Vector3.MoveTowards(movingTowards, stickDirection, SmoothMoveSpeed * Time.deltaTime);
         Move(IsoUtils.TransformVectorToScreenSpace(stickMovement) * MoveSpeed);
 
         movingTowards = stickMovement;
@@ -370,7 +370,7 @@ public class PlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariabels[(int)drunkLevel].movementSpeed;
+                return playerData.drunkenMovementVariables[(int)drunkLevel].movementSpeed;
             }
             else
             {
@@ -386,7 +386,7 @@ public class PlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariabels[(int)drunkLevel].smoothMoveSpeed;
+                return playerData.drunkenMovementVariables[(int)drunkLevel].smoothMoveSpeed;
             }
             else
             {
@@ -402,7 +402,7 @@ public class PlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariabels[(int)drunkLevel].ramSpeed;
+                return playerData.drunkenMovementVariables[(int)drunkLevel].ramSpeed;
             }
             else
             {
@@ -418,7 +418,7 @@ public class PlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariabels[(int)drunkLevel].ramDistance - ramDistanceModifier;
+                return playerData.drunkenMovementVariables[(int)drunkLevel].ramDistance - ramDistanceModifier;
             }
             else
             {
@@ -434,7 +434,7 @@ public class PlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariabels[(int)drunkLevel].hitByRamDistance;
+                return playerData.drunkenMovementVariables[(int)drunkLevel].hitByRamDistance;
             }
             else
             {
@@ -450,7 +450,7 @@ public class PlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariabels[(int)drunkLevel].hitByRamSpeed;
+                return playerData.drunkenMovementVariables[(int)drunkLevel].hitByRamSpeed;
             }
             else
             {

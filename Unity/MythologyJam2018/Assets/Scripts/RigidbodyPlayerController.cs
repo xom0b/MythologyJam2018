@@ -303,7 +303,7 @@ public class RigidbodyPlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariabels[(int)drunkLevel].movementSpeed;
+                return playerData.drunkenMovementVariables[(int)drunkLevel].movementSpeed;
             }
             else
             {
@@ -319,7 +319,7 @@ public class RigidbodyPlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariabels[(int)drunkLevel].smoothMoveSpeed;
+                return playerData.drunkenMovementVariables[(int)drunkLevel].smoothMoveSpeed;
             }
             else
             {
@@ -335,7 +335,7 @@ public class RigidbodyPlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariabels[(int)drunkLevel].ramSpeed;
+                return playerData.drunkenMovementVariables[(int)drunkLevel].ramSpeed;
             }
             else
             {
@@ -351,7 +351,7 @@ public class RigidbodyPlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariabels[(int)drunkLevel].ramDistance;
+                return playerData.drunkenMovementVariables[(int)drunkLevel].ramDistance;
             }
             else
             {

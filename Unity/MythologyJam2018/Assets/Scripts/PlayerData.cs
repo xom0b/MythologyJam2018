@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class PlayerData : MonoBehaviour
@@ -13,7 +14,8 @@ public class PlayerData : MonoBehaviour
     public LayerMask playerLayer;
     public float collisionTimeout;
     public float fallingTimeout;
-    public List<DrunkenMovementVariables> drunkenMovementVariabels = new List<DrunkenMovementVariables>();
+    [FormerlySerializedAs("drunkenMovementVariabels")]
+    public List<DrunkenMovementVariables> drunkenMovementVariables;
     public DrunkLevel maxDrunkLevel;
     public GameObject floor;
     public GameObject killFloor;
