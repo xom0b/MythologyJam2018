@@ -225,7 +225,7 @@ public class PlayerController : MonoBehaviour
     {
         bool pressedRam = false;
 
-        if (inputThisFrame.aButtonDown && groundedThisFrame)
+        if (inputThisFrame.aButtonDown && groundedThisFrame && inputThisFrame.leftStick.sqrMagnitude != 0f)
         {
             SubtractDrunkLevel();
             ramDirection = IsoUtils.TransformVectorToScreenSpace(Vector2ToVector3(inputThisFrame.leftStick).normalized);
