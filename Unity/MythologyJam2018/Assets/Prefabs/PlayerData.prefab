@@ -67,35 +67,33 @@ MonoBehaviour:
   drunkenMovementVariables:
   - drunkLevel: 0
     movementSpeed: 2.5
-    smoothMoveSpeed: 6
-    ramDistance: 3
-    ramSpeed: 8
-    hitByRamDistance: 2
-    hitByRamSpeed: 10
+    smoothMoveSpeed: 3
+    ramDistance: 1.5
+    ramSpeed: 6
+    hitByRamDistance: 1.5
+    hitByRamSpeed: 8
   - drunkLevel: 1
-    movementSpeed: 4.92
-    smoothMoveSpeed: 3
-    ramDistance: 3
-    ramSpeed: 8
-    hitByRamDistance: 3
-    hitByRamSpeed: 12
-  - drunkLevel: 2
     movementSpeed: 3.5
-    smoothMoveSpeed: 3
-    ramDistance: 3
-    ramSpeed: 8
-    hitByRamDistance: 4
-    hitByRamSpeed: 14
-  - drunkLevel: 3
-    movementSpeed: 4
     smoothMoveSpeed: 2
     ramDistance: 3
     ramSpeed: 8
+    hitByRamDistance: 4
+    hitByRamSpeed: 12
+  - drunkLevel: 2
+    movementSpeed: 5
+    smoothMoveSpeed: 1.5
+    ramDistance: 4
+    ramSpeed: 10
     hitByRamDistance: 5
+    hitByRamSpeed: 14
+  - drunkLevel: 3
+    movementSpeed: 6
+    smoothMoveSpeed: 1
+    ramDistance: 5
+    ramSpeed: 12
+    hitByRamDistance: 6
     hitByRamSpeed: 16
   maxDrunkLevel: 3
-  floor: {fileID: 0}
-  killFloor: {fileID: 0}
 --- !u!114 &114779397876071000
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -107,6 +105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04e2198544310ae45a425af2f37d972e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showDebug: 0
-  debugSphere1: {fileID: 0}
-  debugSphere2: {fileID: 0}
+  playerOne: {fileID: 0}
+  playerTwo: {fileID: 0}
+  timeAfterHitToScorePoint: 3
+  debugText: {fileID: 0}

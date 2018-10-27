@@ -17,9 +17,7 @@ public class PlayerData : MonoBehaviour
     [FormerlySerializedAs("drunkenMovementVariabels")]
     public List<DrunkenMovementVariables> drunkenMovementVariables;
     public DrunkLevel maxDrunkLevel;
-    public GameObject floor;
-    public GameObject killFloor;
-
+    
     [System.Serializable]
     public struct DrunkenMovementVariables
     {

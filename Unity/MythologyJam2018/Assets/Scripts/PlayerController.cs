@@ -35,6 +35,10 @@ public class PlayerController : MonoBehaviour
     private Vector3 startingPosition;
 
     // ram variables
+    private int drunkLevelOnRam;
+    private float currentRamSpeed;
+    private float currentRamDistance;
+    private float deltaRamDistance;
     private Vector3 ramDirection;
     private Vector3 startedRamAt = new Vector3();
 
@@ -138,6 +142,7 @@ public class PlayerController : MonoBehaviour
         groundedLastFrame = groundedThisFrame;
     }
 
+
     private void HandleFallReset()
     {
         if (!groundedThisFrame)
@@ -146,9 +151,7 @@ public class PlayerController : MonoBehaviour
 
             if (currentFallTimer >= playerData.fallingTimeout)
             {
-                characterController.SetPosition(startingPosition);
-                currentFallTimer = 0f;
-                movementState = MovementState.Resetting;
+                ResetPosition();
             }
         }
         else
@@ -165,17 +168,19 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    
+
     private void RamHandler()
     {
-        float currentRamDistance = Vector3.Distance(startedRamAt, transform.position);
+        deltaRamDistance += Vector3.Distance(transform.position, positionLastFrame);
 
-        if (currentRamDistance >= RamDistance)
+        if (deltaRamDistance >= currentRamDistance)
         {
             EndRam();
         }
         else
         {
-            Move(ramDirection * RamSpeed);
+            Move(ramDirection * currentRamSpeed);
         }
     }
 
@@ -227,10 +232,14 @@ public class PlayerController : MonoBehaviour
 
         if (inputThisFrame.aButtonDown && groundedThisFrame && inputThisFrame.leftStick.sqrMagnitude != 0f)
         {
-            SubtractDrunkLevel();
+            drunkLevelOnRam = (int)drunkLevel;
+            currentRamDistance = RamDistance;
+            currentRamSpeed = RamSpeed;
+            deltaRamDistance = 0f;
             ramDirection = IsoUtils.TransformVectorToScreenSpace(Vector2ToVector3(inputThisFrame.leftStick).normalized);
             startedRamAt = transform.position;
             pressedRam = true;
+            SubtractDrunkLevel();
         }
 
         return pressedRam;
@@ -270,9 +279,23 @@ public class PlayerController : MonoBehaviour
     {
         return new Vector3(vector.x, 0f, vector.y);
     }
+
+    private void ResetPosition()
+    {
+        characterController.SetPosition(startingPosition);
+        currentFallTimer = 0f;
+        movementState = MovementState.Resetting;
+    }
     #endregion
 
     #region Public Methods
+    public void ResetPlayer()
+    {
+        drunkLevel = PlayerData.DrunkLevel.NotDrunk;
+        ResetPosition();
+        movementState = MovementState.Idle;
+    }
+
     public void FinishedResettingPosition()
     {
         movementState = MovementState.Idle;
@@ -315,7 +338,6 @@ public class PlayerController : MonoBehaviour
         {
             ramDistanceModifier = Vector3.Distance(startedRamAt, transform.position);
             ramDirection = newDirection;
-            startedRamAt = transform.position;
         }
     }
 
@@ -418,7 +440,7 @@ public class PlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariables[(int)drunkLevel].ramDistance - ramDistanceModifier;
+                return playerData.drunkenMovementVariables[(int)drunkLevel].ramDistance;
             }
             else
             {
@@ -434,7 +456,15 @@ public class PlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariables[(int)drunkLevel].hitByRamDistance;
+                if (movementState == MovementState.Ramming)
+                {
+                    return playerData.drunkenMovementVariables[drunkLevelOnRam].hitByRamDistance;
+                }
+                else
+                {
+                    return playerData.drunkenMovementVariables[(int)drunkLevel].hitByRamDistance;
+                }
+                
             }
             else
             {
@@ -450,7 +480,14 @@ public class PlayerController : MonoBehaviour
         {
             if (playerData)
             {
-                return playerData.drunkenMovementVariables[(int)drunkLevel].hitByRamSpeed;
+                if (movementState == MovementState.Ramming)
+                {
+                    return playerData.drunkenMovementVariables[drunkLevelOnRam].hitByRamSpeed;
+                }
+                else
+                {
+                    return playerData.drunkenMovementVariables[(int)drunkLevel].hitByRamSpeed;
+                }
             }
             else
             {

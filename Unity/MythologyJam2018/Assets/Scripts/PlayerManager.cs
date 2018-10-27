@@ -2,21 +2,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerManager : MonoBehaviour
 {
-    [Header("Debug")]
-    public bool showDebug;
-    public GameObject debugSphere1;
-    public GameObject debugSphere2;
+    // inspector variables
+    public PlayerController playerOne;
+    public PlayerController playerTwo;
+    public float timeAfterHitToScorePoint;
 
     // private variables
     private PlayerPlayerCollisionInfo playerPlayerCollisionThisFrame = null;
     private List<PlayerChaliceCollisionInfo> playerChaliceCollisionsThisFrame = new List<PlayerChaliceCollisionInfo>();
-
-    // private debug
-    private Vector3 debugPosition;
-    private Vector3 debugDirection;
+    private float playerOnePointCounter;
+    private float playerTwoPointCounter;
 
     #region Classes
     private class PlayerPlayerCollisionInfo
@@ -73,16 +72,23 @@ public class PlayerManager : MonoBehaviour
 
     private void Start()
     {
-        if (showDebug)
+        playerOnePointCounter = timeAfterHitToScorePoint;
+        playerTwoPointCounter = timeAfterHitToScorePoint;
+    }
+
+    private void Update()
+    {
+        if (playerOnePointCounter < timeAfterHitToScorePoint)
         {
-            debugSphere1.SetActive(true);
-            debugSphere2.SetActive(true);
+            playerOnePointCounter += Time.deltaTime;
         }
-        else
+
+        if (playerTwoPointCounter < timeAfterHitToScorePoint)
         {
-            debugSphere1.SetActive(false);
-            debugSphere2.SetActive(false);
+            playerTwoPointCounter += Time.deltaTime;
         }
+
+        debugText.text = "P1: " + playerOnePointCounter + " \nP2: " + playerTwoPointCounter;
     }
 
     private void LateUpdate()
@@ -94,7 +100,7 @@ public class PlayerManager : MonoBehaviour
 
         if (playerChaliceCollisionsThisFrame.Count > 0)
         {
-            foreach(PlayerChaliceCollisionInfo playerChaliceCollision in playerChaliceCollisionsThisFrame)
+            foreach (PlayerChaliceCollisionInfo playerChaliceCollision in playerChaliceCollisionsThisFrame)
             {
                 ProcessPlayerChaliceCollision(playerChaliceCollision);
             }
@@ -102,13 +108,18 @@ public class PlayerManager : MonoBehaviour
 
         playerChaliceCollisionsThisFrame.Clear();
         playerPlayerCollisionThisFrame = null;
-        Debug.DrawLine(debugPosition, debugPosition + debugDirection.normalized * 2f, Color.cyan);
     }
 
     #endregion
 
 
     #region Public Methods
+    public void ResetPlayers()
+    {
+        playerOne.ResetPlayer();
+        playerTwo.ResetPlayer();
+    }
+
     public void RegisterPlayerPlayerCollisionThisFrame(GameObject registeredCollision, GameObject collidedWith)
     {
         playerPlayerCollisionThisFrame = new PlayerPlayerCollisionInfo(registeredCollision, collidedWith);
@@ -146,7 +157,7 @@ public class PlayerManager : MonoBehaviour
         float p = playerController.velocity.x * newX + playerController.velocity.z * newZ;
 
         Vector3 newRegisteredDirection = new Vector3(playerController.velocity.x - p * newX, 0f, playerController.velocity.z - p * newZ).normalized;
-        
+
         if (playerController.GetMovementState() == PlayerController.MovementState.HitByRam)
         {
             playerController.UpdateHitByRamDirection(newRegisteredDirection);
@@ -194,17 +205,27 @@ public class PlayerManager : MonoBehaviour
 
             float newX = (collidedPlayerController.transform.position.x - registeredPlayerController.transform.position.x) / distance;
             float newZ = (collidedPlayerController.transform.position.z - registeredPlayerController.transform.position.z) / distance;
-            
+
             float p = registeredVelocity.x * newX + registeredVelocity.z * newZ - collidedVelocity.x * newX - collidedVelocity.z * newZ;
 
             Vector3 newRegisteredDirection = new Vector3(registeredVelocity.x - p * newX, 0f, registeredVelocity.z - p * newZ).normalized;
             Vector3 newCollidedDirection = new Vector3(collidedVelocity.x + p * newX, 0f, collidedVelocity.z + p * newZ).normalized;
 
-            float newRegisteredDistance = registeredPlayerController.HitByRamDistance;
+            float newRegisteredDistance = collidedPlayerController.HitByRamDistance;
             float newCollidedDistance = registeredPlayerController.HitByRamDistance;
 
             float newRegisteredSpeed = 0f;
             float newCollidedSpeed = 0f;
+
+            if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
+            {
+                ResetPlayerPointCounter(registeredPlayerController);
+            }
+
+            if (collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
+            {
+                ResetPlayerPointCounter(collidedPlayerController);
+            }
 
             // RAM V RAM COLLISION
             if (registeredPlayerController.GetMovementState() == PlayerController.MovementState.Ramming && collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
@@ -238,7 +259,7 @@ public class PlayerManager : MonoBehaviour
                 }
                 else if (collidedPlayerController.GetMovementState() == PlayerController.MovementState.Ramming)
                 {
-                    newRegisteredSpeed = collidedPlayerController.HitByRamSpeed; 
+                    newRegisteredSpeed = collidedPlayerController.HitByRamSpeed;
                     registeredPlayerController.RegisterCollision(newRegisteredDirection.normalized, newRegisteredSpeed, newRegisteredDistance);
                     collidedPlayerController.EndRam(); // this feels better, but is subject to change
                 }
@@ -246,4 +267,42 @@ public class PlayerManager : MonoBehaviour
         }
     }
     #endregion
+
+    private void ResetPlayerPointCounter(PlayerController playerController)
+    {
+        if (playerController == playerOne)
+        {
+            playerOnePointCounter = 0f;
+        }
+        else if (playerController == playerTwo)
+        {
+            playerTwoPointCounter = 0f;
+        }
+    }
+
+    public Text debugText;
+
+    public void RegisterPointTrigger(PlayerController playerController)
+    {
+        if (playerController == playerOne && playerTwoPointCounter < timeAfterHitToScorePoint)
+        {
+            // PLAYER TWO SCORES POINT
+            GameManager gameManager;
+            if (GameManager.TryGetInstance(out gameManager))
+            {
+                gameManager.AddPoint(1);
+                playerTwoPointCounter = timeAfterHitToScorePoint;
+            }
+        }
+        else if (playerController == playerTwo && playerOnePointCounter < timeAfterHitToScorePoint)
+        {
+            // PLAYER ONE SCORES POINT
+            GameManager gameManager;
+            if (GameManager.TryGetInstance(out gameManager))
+            {
+                gameManager.AddPoint(0);
+                playerOnePointCounter = timeAfterHitToScorePoint;
+            }
+        }
+    }
 }
