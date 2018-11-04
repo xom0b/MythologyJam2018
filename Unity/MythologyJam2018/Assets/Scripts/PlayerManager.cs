@@ -14,10 +14,28 @@ public class PlayerManager : MonoBehaviour
     // private variables
     private PlayerPlayerCollisionInfo playerPlayerCollisionThisFrame = null;
     private List<PlayerChaliceCollisionInfo> playerChaliceCollisionsThisFrame = new List<PlayerChaliceCollisionInfo>();
+    private List<PlayerWallCollisionInfo> playerWallCollisionsThisFrame = new List<PlayerWallCollisionInfo>();
     private float playerOnePointCounter;
     private float playerTwoPointCounter;
 
     #region Classes
+    private class PlayerWallCollisionInfo
+    {
+        public PlayerController playerController;
+        public BonkWall bonkWall;
+
+        public PlayerWallCollisionInfo(PlayerController playerController, BonkWall bonkWall)
+        {
+            this.playerController = playerController;
+            this.bonkWall = bonkWall;
+        }
+
+        public override string ToString()
+        {
+            return playerController.gameObject.name + " " + bonkWall.gameObject.name;
+        }
+    }
+
     private class PlayerPlayerCollisionInfo
     {
         public GameObject registeredCollision;
@@ -98,15 +116,18 @@ public class PlayerManager : MonoBehaviour
             ProcessPlayerPlayerCollision(playerPlayerCollisionThisFrame);
         }
 
-        if (playerChaliceCollisionsThisFrame.Count > 0)
+        foreach (PlayerChaliceCollisionInfo playerChaliceCollision in playerChaliceCollisionsThisFrame)
         {
-            foreach (PlayerChaliceCollisionInfo playerChaliceCollision in playerChaliceCollisionsThisFrame)
-            {
-                ProcessPlayerChaliceCollision(playerChaliceCollision);
-            }
+            ProcessPlayerChaliceCollision(playerChaliceCollision);
+        }
+
+        foreach (PlayerWallCollisionInfo playerWallCollision in playerWallCollisionsThisFrame)
+        {
+            ProcessPlayerWallCollision(playerWallCollision);
         }
 
         playerChaliceCollisionsThisFrame.Clear();
+        playerWallCollisionsThisFrame.Clear();
         playerPlayerCollisionThisFrame = null;
     }
 
@@ -129,9 +150,30 @@ public class PlayerManager : MonoBehaviour
     {
         playerChaliceCollisionsThisFrame.Add(new PlayerChaliceCollisionInfo(chalice, player));
     }
+
+    public void RegisterPlayerWallCollisionThisFrame(PlayerController playerController, BonkWall wall)
+    {
+        playerWallCollisionsThisFrame.Add(new PlayerWallCollisionInfo(playerController, wall));
+    }
     #endregion
 
     #region Collision Processing
+    private void ProcessPlayerWallCollision(PlayerWallCollisionInfo collision)
+    {
+        // from: https://gamedev.stackexchange.com/questions/23672/determine-resulting-angle-of-wall-collision
+        // return vector - 2 * Vector3.Dot(vector, normal) * normal;
+        Vector3 ramDirection = collision.playerController.velocity.normalized;
+        Vector3 newDirection = ramDirection - 2 * Vector3.Dot(ramDirection, collision.bonkWall.wallNormal.normalized) * collision.bonkWall.wallNormal.normalized;
+
+        if (collision.playerController.GetMovementState() == PlayerController.MovementState.Ramming)
+        {
+            collision.playerController.UpdateRamDirection(newDirection.normalized);
+        }
+        else if (collision.playerController.GetMovementState() == PlayerController.MovementState.HitByRam)
+        {
+            collision.playerController.UpdateHitByRamDirection(newDirection.normalized);
+        }
+    }
 
     private void ProcessPlayerChaliceCollision(PlayerChaliceCollisionInfo collision)
     {

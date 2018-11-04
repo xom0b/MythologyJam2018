@@ -13,6 +13,15 @@ public class BonkWall : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("I: " + transform.parent.gameObject.name + " hit: " + collision.gameObject.name);
+        PlayerController playerHit = collision.gameObject.GetComponent<PlayerController>();
+
+        if (playerHit != null)
+        {
+            PlayerManager playerManager;
+            if (PlayerManager.TryGetInstance(out playerManager))
+            {
+                playerManager.RegisterPlayerWallCollisionThisFrame(playerHit, this);
+            }
+        }
     }
 }
